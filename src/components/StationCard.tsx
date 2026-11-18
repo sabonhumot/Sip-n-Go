@@ -60,11 +60,15 @@ export const StationCard: FC<StationCardProps> = ({
     >
       <div className="flex gap-4 items-start">
         {/* Thumbnail Image */}
-        <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800">
+        <div
+          className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800"
+          style={{ width: '64px', height: '64px', minWidth: '64px', minHeight: '64px' }}
+        >
           <img
             src={station.image}
             alt={station.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-full h-full object-cover block transition-transform duration-300 group-hover:scale-105"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             loading="lazy"
           />
           {/* Free Badge */}

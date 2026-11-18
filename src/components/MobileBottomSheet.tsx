@@ -228,11 +228,15 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
               onClick={() => onSelectStation(closestStation)}
               className="flex items-center gap-3 cursor-pointer pt-0.5"
             >
-              <div className="relative w-15 h-15 rounded-2xl overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800 shadow-xs">
+              <div
+                className="relative w-14 h-14 rounded-2xl overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800 shadow-xs"
+                style={{ width: '56px', height: '56px', minWidth: '56px', minHeight: '56px' }}
+              >
                 <img
                   src={closestStation.image}
                   alt={closestStation.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover block"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
                 <span className="absolute bottom-1 left-1 px-1.5 py-0.2 rounded bg-black/75 text-[9px] font-bold text-white">
                   {closestStation.priceTag}
