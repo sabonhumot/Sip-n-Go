@@ -89,9 +89,15 @@ export const BottleScanGate: FC<BottleScanGateProps> = ({
   );
 
   // Start in-browser camera stream
-  const startCamera = async () => {
+  const startCamera = async (targetFacingMode?: 'environment' | 'user') => {
+    const mode =
+      targetFacingMode === 'user' || targetFacingMode === 'environment'
+        ? targetFacingMode
+        : facingMode;
     setCameraError(null);
     setScanStatusMessage('Starting camera scanner...');
+    // Mount the camera viewfinder in DOM immediately so videoRef is ready
+    setIsCameraActive(true);
 
     // Stop any existing stream
     if (streamRef.current) {
@@ -106,7 +112,7 @@ export const BottleScanGate: FC<BottleScanGateProps> = ({
 
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: { ideal: facingMode },
+          facingMode: { ideal: mode },
           width: { ideal: 1280 },
           height: { ideal: 720 },
         },
@@ -114,13 +120,17 @@ export const BottleScanGate: FC<BottleScanGateProps> = ({
       });
 
       streamRef.current = stream;
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.setAttribute('playsinline', 'true'); // Required for iOS Safari
-        await videoRef.current.play();
+        videoRef.current.setAttribute('playsinline', 'true');
+        try {
+          await videoRef.current.play();
+        } catch (e) {
+          console.warn('Video play warning:', e);
+        }
       }
 
-      setIsCameraActive(true);
       setScanStatusMessage('Point camera at bottle QR code');
     } catch (err: unknown) {
       const errorMsg =
@@ -129,6 +139,25 @@ export const BottleScanGate: FC<BottleScanGateProps> = ({
       setIsCameraActive(false);
     }
   };
+
+  // Ensure video element receives stream as soon as it mounts into DOM
+  useEffect(() => {
+    if (isCameraActive && videoRef.current && streamRef.current) {
+      if (videoRef.current.srcObject !== streamRef.current) {
+        videoRef.current.srcObject = streamRef.current;
+        videoRef.current.setAttribute('playsinline', 'true');
+        videoRef.current.play().catch((e) => console.warn('Video play warning:', e));
+      }
+    }
+  }, [isCameraActive]);
+
+  // Auto-start camera when Gate mounts
+  useEffect(() => {
+    startCamera();
+    return () => {
+      stopCamera();
+    };
+  }, []);
 
   // Stop camera stream
   const stopCamera = useCallback(() => {
@@ -147,11 +176,7 @@ export const BottleScanGate: FC<BottleScanGateProps> = ({
   const toggleFacingMode = () => {
     const nextMode = facingMode === 'environment' ? 'user' : 'environment';
     setFacingMode(nextMode);
-    if (isCameraActive) {
-      setTimeout(() => {
-        startCamera();
-      }, 100);
-    }
+    startCamera(nextMode);
   };
 
   // Frame processing loop for QR detection
@@ -413,7 +438,7 @@ export const BottleScanGate: FC<BottleScanGateProps> = ({
 
               {/* Action 1: Open Live Camera Scanner */}
               <button
-                onClick={startCamera}
+                onClick={() => startCamera()}
                 className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold text-sm shadow-lg shadow-cyan-500/25 transition-all transform active:scale-95 cursor-pointer"
               >
                 <Camera size={18} />

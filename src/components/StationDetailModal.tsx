@@ -288,7 +288,7 @@ export const StationDetailModal: FC<StationDetailModalProps> = ({
 
           {/* Refill Success Toast Animation */}
           {refillSuccess && (
-            <div className="p-3.5 rounded-2xl bg-emerald-500 text-white flex items-center justify-between animate-bounce shadow-lg">
+            <div className="p-3.5 rounded-2xl bg-emerald-500 text-white flex items-center justify-between animate-slide-down shadow-lg">
               <div className="flex items-center gap-2 text-sm font-bold">
                 <Check size={18} />
                 <span>Refill Logged to your Sip n Go Bottle! (+500 mL)</span>

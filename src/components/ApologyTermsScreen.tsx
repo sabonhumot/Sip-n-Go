@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import type { FC } from 'react';
 import { Heart, Sparkles, Check } from './Icons';
 
@@ -11,55 +11,67 @@ export const ApologyTermsScreen: FC<ApologyTermsScreenProps> = ({
   onAccept,
   bottleId,
 }) => {
-  const [declinePosition, setDeclinePosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [declineOffset, setDeclineOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [declineAttempts, setDeclineAttempts] = useState<number>(0);
   const [isAccepted, setIsAccepted] = useState<boolean>(false);
   const [playfulNote, setPlayfulNote] = useState<string | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const playfulMessages = [
-    'Oops! Button slipped away 🙈',
-    'Error: Decline option not found! Try Accept 💕',
-    'Dodong is very sorry, please? 🥺',
-    'Too slow! Dodong loves you too much 🏃‍♂️💨',
-    'No declining allowed! Say yes please 🥰',
-    'Just tap Accept already! ❤️',
+    'Oops! Button slipped away 💨',
+    'Decline ran away! Say yes please 🥺',
+    'Too fast! Dodong is very sorry ❤️',
+    'No declining allowed! You must forgive Dodong 💖',
+    'Dodong loves you way too much to let you decline 🥰',
+    'Just tap Accept already! 💕',
   ];
 
-  // Runaway button mechanic: teleports when touched, hovered, or clicked
-  const moveDeclineButton = useCallback((e?: React.SyntheticEvent) => {
-    if (e && e.type === 'touchstart') {
-      try {
-        (e as any).preventDefault?.();
-      } catch {}
+  const declineButtonLabels = [
+    'Decline',
+    'Oops! Slipped 💨',
+    'Too slow! 🏃‍♂️',
+    'Can’t click me! 🙈',
+    'Dodong is sorry! 🥺',
+    'Only Accept works ❤️',
+  ];
+
+  // Runaway button mechanic: teleports whenever hovered, touched, or tapped
+  // Guarantees it NEVER proceeds and ALWAYS dashes away from finger/cursor
+  const runAway = useCallback((e?: React.SyntheticEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
     }
 
-    // Tightly bounded for mobile phone screens so it never overflows or causes scroll
-    const maxX = 65;
-    const maxY = 38;
-    
-    // Generate new random offset that doesn't stay near 0
-    let newX = (Math.random() * 2 - 1) * maxX;
-    let newY = (Math.random() * 2 - 1) * maxY;
-    
-    // Ensure it moves noticeably
-    if (Math.abs(newX) < 25) newX = newX < 0 ? -45 : 45;
-    if (Math.abs(newY) < 16) newY = newY < 0 ? -28 : 28;
+    setDeclineOffset((prev) => {
+      // Pick random direction with minimum displacement of 80px horizontally and 25px vertically
+      const dirX = prev.x >= 0 ? -1 : 1;
+      const dirY = prev.y >= 0 ? -1 : 1;
 
-    setDeclinePosition({ x: Math.round(newX), y: Math.round(newY) });
+      // Random jitter
+      const distanceX = 75 + Math.random() * 45; // 75px to 120px
+      const distanceY = 20 + Math.random() * 25; // 20px to 45px
+
+      let newX = dirX * distanceX;
+      let newY = dirY * distanceY;
+
+      // Clamp within safe mobile arena bounds [-110, 110] x [-35, 35]
+      newX = Math.max(-110, Math.min(110, newX));
+      newY = Math.max(-35, Math.min(35, newY));
+
+      return { x: Math.round(newX), y: Math.round(newY) };
+    });
+
     setDeclineAttempts((prev) => {
       const next = prev + 1;
       setPlayfulNote(playfulMessages[(next - 1) % playfulMessages.length]);
       return next;
     });
 
-    // Device haptic vibration if supported
+    // Mobile haptic vibration if supported
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       try {
-        navigator.vibrate([30, 40]);
-      } catch {
-        // ignore
-      }
+        navigator.vibrate([25, 35]);
+      } catch {}
     }
   }, [playfulMessages]);
 
@@ -68,17 +80,18 @@ export const ApologyTermsScreen: FC<ApologyTermsScreenProps> = ({
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       try {
         navigator.vibrate([60, 100, 60, 120]);
-      } catch {
-        // ignore
-      }
+      } catch {}
     }
     setTimeout(() => {
       onAccept();
     }, 1200);
   };
 
+  const currentButtonLabel =
+    declineButtonLabels[Math.min(declineAttempts, declineButtonLabels.length - 1)];
+
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-gradient-to-b from-rose-50/70 via-sky-50/50 to-white text-slate-900 overflow-y-auto overflow-x-hidden touch-scroll">
+    <div className="fixed inset-0 z-50 flex flex-col bg-gradient-to-b from-rose-50/80 via-sky-50/50 to-white text-slate-900 overflow-y-auto touch-scroll">
       {/* Soft romantic ambient background orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-32 -left-32 w-80 h-80 bg-rose-200/40 rounded-full blur-3xl animate-pulse"></div>
@@ -142,10 +155,10 @@ export const ApologyTermsScreen: FC<ApologyTermsScreenProps> = ({
 
             {/* Apology Body */}
             <div className="space-y-3.5 text-xs text-slate-700 leading-relaxed font-sans max-h-56 overflow-y-auto pr-1">
-              {/* The required exact text highlighted */}
+              {/* Exact required text prominently highlighted */}
               <div className="p-3.5 rounded-2xl bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200/80 text-rose-950">
                 <p className="text-sm font-black text-rose-600 tracking-tight m-0">
-                  "Im very sorry. Can you forgive dodong?" 🥺
+                  "Im very sorry. Can you forgive dodong?"
                 </p>
               </div>
 
@@ -178,7 +191,7 @@ export const ApologyTermsScreen: FC<ApologyTermsScreenProps> = ({
                   Clause 3: Non-Declination Clause
                 </h4>
                 <p className="text-slate-600 text-[11px]">
-                  Under subsection 3.1, declining this apology is deemed emotionally impossible. Attempting to click Decline will trigger evasive evasions.
+                  Under subsection 3.1, declining this apology is deemed emotionally impossible. Attempting to click Decline will trigger evasive maneuvers.
                 </p>
               </div>
             </div>
@@ -192,8 +205,8 @@ export const ApologyTermsScreen: FC<ApologyTermsScreenProps> = ({
           </div>
         )}
 
-        {/* Buttons Action Area with safe-area padding */}
-        <div ref={containerRef} className="mt-5 relative pb-safe">
+        {/* Buttons Action Area */}
+        <div className="mt-5 relative pb-2 flex flex-col gap-3">
           {/* Success Heart Explosion State */}
           {isAccepted ? (
             <div className="w-full py-4 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-500 to-emerald-500 text-white font-black text-sm text-center shadow-xl shadow-rose-500/30 animate-pulse flex items-center justify-center gap-2">
@@ -201,9 +214,10 @@ export const ApologyTermsScreen: FC<ApologyTermsScreenProps> = ({
               <span>Yay! Dodong is forgiven! Loading Sip n Go... ❤️</span>
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
-              {/* PRIMARY ACCEPT BUTTON */}
+            <>
+              {/* PRIMARY ACCEPT BUTTON - ALWAYS CLEANLY SEPARATED */}
               <button
+                type="button"
                 onClick={handleAcceptClick}
                 className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-600 to-cyan-600 hover:from-rose-600 hover:to-cyan-700 text-white font-black text-sm shadow-xl shadow-rose-500/25 transition-all transform active:scale-95 cursor-pointer flex items-center justify-center gap-2"
               >
@@ -211,35 +225,33 @@ export const ApologyTermsScreen: FC<ApologyTermsScreenProps> = ({
                 <span>Accept & Forgive Dodong ❤️</span>
               </button>
 
-              {/* RUNAWAY DECLINE BUTTON */}
-              <div className="relative h-12 flex items-center justify-center">
+              {/* DEDICATED DECLINE ARENA - GUARANTEED RUNAWAY ON TOUCH & CLICK */}
+              <div className="relative h-14 w-full flex items-center justify-center overflow-hidden select-none">
                 <button
                   type="button"
-                  onMouseEnter={moveDeclineButton}
-                  onTouchStart={moveDeclineButton}
-                  onPointerDown={moveDeclineButton}
-                  onClick={moveDeclineButton}
-                  style={{
-                    transform: `translate(${declinePosition.x}px, ${declinePosition.y}px)`,
-                    transition: 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  onTouchStart={runAway}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                   }}
-                  className="py-2.5 px-6 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 text-xs font-semibold border border-slate-200 cursor-pointer shadow-xs select-none active:scale-90"
+                  onPointerDown={runAway}
+                  onMouseEnter={runAway}
+                  onClick={runAway}
+                  style={{
+                    transform: `translate(${declineOffset.x}px, ${declineOffset.y}px)`,
+                    transition: 'transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  }}
+                  className="py-2.5 px-6 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 text-xs font-semibold border border-slate-200 cursor-pointer shadow-xs select-none touch-none active:scale-90"
                 >
-                  {declineAttempts === 0
-                    ? 'Decline'
-                    : declineAttempts === 1
-                    ? 'Are you sure? 🥺'
-                    : declineAttempts === 2
-                    ? "Can't click me! 🏃"
-                    : 'Decline (Dodong is sorry!)'}
+                  {currentButtonLabel}
                 </button>
               </div>
-            </div>
+            </>
           )}
 
           {/* Security & Love note */}
-          <p className="mt-2 text-[10px] text-slate-400 text-center leading-tight">
-            🔒 By clicking Accept, you consent to receive lifetime love, hydration, and loyalty.
+          <p className="mt-1 text-[10px] text-slate-400 text-center leading-tight">
+            💌 By clicking Accept, you consent to receive lifetime love, hydration, and loyalty.
           </p>
         </div>
       </main>

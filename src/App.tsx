@@ -67,7 +67,7 @@ export const App: FC = () => {
     }
   });
 
-  // Terms and conditions acceptance state (Apology letter)
+  // Terms and conditions acceptance state (Apology letter to girlfriend)
   const [isTermsAccepted, setIsTermsAccepted] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     try {
@@ -516,54 +516,73 @@ export const App: FC = () => {
         />
       )}
 
-      {/* Location Permission / Error Alert Banner */}
-      {locationErrorNotice && !isNavigating && (
-        <div className="fixed top-14 left-3 right-3 z-40 bg-amber-500/95 text-slate-950 px-3.5 py-2.5 rounded-2xl shadow-xl flex items-center justify-between text-xs animate-fade-in border border-amber-300 font-medium">
-          <div className="flex items-center gap-2 flex-1 mr-2">
-            <AlertTriangle size={16} className="shrink-0" />
-            <span className="leading-snug">{locationErrorNotice}</span>
+      {/* FLOATING TOAST NOTIFICATION STACK
+          Safely positioned below MobileHeader across all device notches and dynamic islands (z-[1200]) */}
+      <div className="fixed top-[calc(max(12px,env(safe-area-inset-top,0px))+3.65rem)] left-0 right-0 z-[1200] pointer-events-none flex flex-col items-center gap-2 px-3">
+        {/* Refill Success Celebration Toast */}
+        {celebrationMessage && (
+          <div className="pointer-events-auto w-full max-w-sm px-4 py-2.5 rounded-2xl bg-emerald-600/95 dark:bg-emerald-600/95 backdrop-blur-xl text-white shadow-2xl shadow-emerald-950/30 font-bold text-xs flex items-center justify-between gap-2.5 animate-slide-down border border-emerald-400/40">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-6 h-6 rounded-full bg-emerald-500/80 flex items-center justify-center shrink-0 border border-emerald-300/40">
+                <Check size={14} className="stroke-[3]" />
+              </div>
+              <span className="leading-snug truncate">{celebrationMessage}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setCelebrationMessage(null)}
+              className="text-white/70 hover:text-white p-1 rounded-lg text-xs shrink-0 cursor-pointer transition-colors"
+              aria-label="Dismiss toast"
+            >
+              ✕
+            </button>
           </div>
-          <button
-            onClick={requestUserLocation}
-            className="px-2.5 py-1 bg-slate-950 text-white rounded-xl text-[11px] font-bold shrink-0 flex items-center gap-1 cursor-pointer active:scale-95"
-          >
-            <RefreshCw size={12} className={isLocating ? 'animate-spin' : ''} />
-            <span>Retry</span>
-          </button>
-        </div>
-      )}
+        )}
 
-      {/* Calculating Route Toast */}
-      {isCalculatingRoute && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl bg-cyan-600 text-white shadow-2xl font-bold text-xs flex items-center gap-2 animate-pulse border border-cyan-400">
-          <RefreshCw size={14} className="animate-spin" />
-          <span>Calculating walking route...</span>
-        </div>
-      )}
-
-      {/* Top Scanned QR Notification Banner */}
-      {justScannedNotice && !isNavigating && (
-        <div className="fixed top-14 left-3 right-3 z-40 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white px-3.5 py-2 rounded-2xl shadow-xl flex items-center justify-between text-xs animate-fade-in border border-cyan-400/30">
-          <div className="flex items-center gap-2 font-medium truncate">
-            <Sparkles size={15} className="text-cyan-200 shrink-0" />
-            <span className="truncate">{justScannedNotice}</span>
+        {/* Calculating Route Toast */}
+        {isCalculatingRoute && (
+          <div className="pointer-events-auto w-auto px-4 py-2 rounded-full bg-cyan-600/95 backdrop-blur-xl text-white shadow-xl shadow-cyan-950/25 font-bold text-xs flex items-center gap-2 border border-cyan-400/40 animate-slide-down">
+            <RefreshCw size={13} className="animate-spin text-cyan-200" />
+            <span>Calculating walking route...</span>
           </div>
-          <button
-            onClick={() => setJustScannedNotice(null)}
-            className="text-white/80 hover:text-white ml-2 text-sm font-bold cursor-pointer"
-          >
-            ×
-          </button>
-        </div>
-      )}
+        )}
 
-      {/* Refill Success Celebration Toast */}
-      {celebrationMessage && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl bg-emerald-600 text-white shadow-2xl font-bold text-xs flex items-center gap-2 animate-bounce border border-emerald-400/30 whitespace-nowrap">
-          <Check size={16} />
-          <span>{celebrationMessage}</span>
-        </div>
-      )}
+        {/* Top Scanned QR Notification Toast */}
+        {justScannedNotice && !isNavigating && (
+          <div className="pointer-events-auto w-full max-w-sm px-4 py-2.5 rounded-2xl bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white shadow-2xl shadow-blue-950/30 flex items-center justify-between text-xs animate-slide-down border border-cyan-400/30">
+            <div className="flex items-center gap-2 font-medium min-w-0">
+              <Sparkles size={15} className="text-cyan-200 shrink-0" />
+              <span className="truncate">{justScannedNotice}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setJustScannedNotice(null)}
+              className="text-white/70 hover:text-white p-1 text-xs shrink-0 cursor-pointer transition-colors"
+              aria-label="Dismiss notice"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
+        {/* Location Permission / Error Alert Banner */}
+        {locationErrorNotice && !isNavigating && (
+          <div className="pointer-events-auto w-full max-w-sm bg-amber-500/95 dark:bg-amber-600/95 backdrop-blur-xl text-slate-950 dark:text-white px-3.5 py-2.5 rounded-2xl shadow-2xl flex items-center justify-between text-xs animate-slide-down border border-amber-300 dark:border-amber-400 font-medium">
+            <div className="flex items-center gap-2 flex-1 mr-2 min-w-0">
+              <AlertTriangle size={16} className="shrink-0 text-amber-950 dark:text-amber-200" />
+              <span className="leading-snug text-[11px]">{locationErrorNotice}</span>
+            </div>
+            <button
+              type="button"
+              onClick={requestUserLocation}
+              className="px-2.5 py-1 bg-slate-950 text-white rounded-xl text-[10px] font-bold shrink-0 flex items-center gap-1 cursor-pointer active:scale-95 shadow-xs"
+            >
+              <RefreshCw size={11} className={isLocating ? 'animate-spin' : ''} />
+              <span>Retry</span>
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Full Viewport Map Background with walking route overlay */}
       <div className="relative flex-1 w-full h-full min-h-0">

@@ -236,6 +236,22 @@ html, body {
   animation: fadeIn 0.22s ease-out forwards;
 }
 
+/* Toast Notification Slide-Down Animation */
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-slide-down {
+  animation: slideDown 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 /* Safe area padding utilities */
 .pt-safe {
   padding-top: max(12px, env(safe-area-inset-top));

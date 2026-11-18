@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import type { RefillStation, FilterOptions } from '../types';
 import { StationCard } from './StationCard';
 import { FilterBar } from './FilterBar';
-import { MapPin, Navigation, Droplet, Star } from './Icons';
+import { MapPin, Navigation, Droplet, Star, ChevronUp, ChevronDown } from './Icons';
 import { formatDistance, estimateWalkingTime } from '../utils/geo';
 
 export type SheetState = 'peek' | 'half' | 'full';
@@ -43,7 +43,7 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
     else setSheetState('peek');
   };
 
-  // Full Bidirectional Touch Swipe Gestures (Swipe UP to expand, Swipe DOWN to collapse)
+  // Full Bidirectional Touch Swipe Gestures
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartY.current = e.touches[0].clientY;
     setIsDragging(true);
@@ -60,7 +60,7 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
       if (deltaY < 0) {
         setDragOffsetY(deltaY);
       } else {
-        setDragOffsetY(deltaY * 0.25);
+        setDragOffsetY(deltaY * 0.2);
       }
     } else if (sheetState === 'half') {
       // Swiping UP pulls toward full; swiping DOWN pulls toward peek
@@ -70,7 +70,7 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
       if (deltaY > 0) {
         setDragOffsetY(deltaY);
       } else {
-        setDragOffsetY(deltaY * 0.25);
+        setDragOffsetY(deltaY * 0.2);
       }
     }
   };
@@ -88,18 +88,18 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
       return;
     }
 
-    // Swipe UP threshold (< -40px)
-    if (deltaY < -40) {
+    // Swipe UP threshold (< -35px)
+    if (deltaY < -35) {
       if (sheetState === 'peek') {
-        setSheetState(deltaY < -130 ? 'full' : 'half');
+        setSheetState(deltaY < -120 ? 'full' : 'half');
       } else if (sheetState === 'half') {
         setSheetState('full');
       }
     }
-    // Swipe DOWN threshold (> 40px)
-    else if (deltaY > 40) {
+    // Swipe DOWN threshold (> 35px)
+    else if (deltaY > 35) {
       if (sheetState === 'full') {
-        setSheetState(deltaY > 130 ? 'peek' : 'half');
+        setSheetState(deltaY > 120 ? 'peek' : 'half');
       } else if (sheetState === 'half') {
         setSheetState('peek');
       }
@@ -109,12 +109,13 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
   const getHeightClass = () => {
     switch (sheetState) {
       case 'full':
-        return 'h-[86dvh] max-h-[calc(100dvh-5.5rem)]';
+        return 'h-[88dvh] max-h-[calc(100dvh-5.5rem)]';
       case 'half':
-        return 'h-[54dvh]';
+        return 'h-[56dvh]';
       case 'peek':
       default:
-        return 'h-[235px]';
+        // Sleek compact height: reveals spotlight station bar, hides rest of contents below
+        return 'h-[122px]';
     }
   };
 
@@ -126,16 +127,16 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
       }}
       className={`fixed left-0 right-0 bottom-sheet-base z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-t-3xl border-t border-slate-200/80 dark:border-slate-800 shadow-2xl flex flex-col bottom-sheet-snap ${getHeightClass()}`}
     >
-      {/* Draggable Handle Bar with Full Touch Swipe Gestures */}
+      {/* Draggable Handle Bar (pinned at top) */}
       <div
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className="w-full pt-3 pb-2.5 flex flex-col items-center justify-center cursor-pointer select-none shrink-0 active:opacity-75 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors touch-none"
-        title={sheetState === 'peek' ? 'Swipe up to expand' : 'Swipe down to collapse'}
+        className="w-full pt-2.5 pb-1.5 flex flex-col items-center justify-center cursor-pointer select-none shrink-0 active:opacity-75 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors touch-none"
+        title={sheetState === 'peek' ? 'Swipe up to reveal stations' : 'Swipe down to collapse'}
       >
         <div className="w-14 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600 transition-colors"></div>
-        <div className="flex items-center justify-between w-full px-5 mt-1.5 text-[11px] font-bold text-slate-400">
+        <div className="flex items-center justify-between w-full px-5 mt-1 text-[11px] font-bold text-slate-400">
           <span className="flex items-center gap-1 text-cyan-600 dark:text-cyan-400">
             <MapPin size={12} />
             <span>{stations.length} stations nearby</span>
@@ -153,96 +154,123 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
                 {sheetState === 'full' ? 'Half view' : 'Max view ↑'}
               </button>
             )}
-            <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">
-              {sheetState === 'peek' ? 'Swipe up for list ↑' : 'Swipe down to collapse ↓'}
+            <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold flex items-center gap-0.5">
+              {sheetState === 'peek' ? (
+                <>
+                  <span>Swipe up to explore</span>
+                  <ChevronUp size={11} className="text-cyan-500 animate-bounce" />
+                </>
+              ) : (
+                <>
+                  <span>Swipe down to collapse</span>
+                  <ChevronDown size={11} />
+                </>
+              )}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Content depending on sheet state */}
-      <div className="flex-1 overflow-hidden flex flex-col px-4 pb-2">
-        {sheetState === 'peek' ? (
-          /* Peek Mode: Spotlights the closest water refilling station right at thumb's reach */
-          closestStation ? (
-            <div className="flex-1 flex flex-col justify-between py-1">
-              <div
-                onClick={() => onSelectStation(closestStation)}
-                className="flex items-center gap-3 cursor-pointer"
-              >
-                <div className="relative w-16 h-16 rounded-2xl overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800">
-                  <img
-                    src={closestStation.image}
-                    alt={closestStation.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <span className="absolute bottom-1 left-1 px-1 py-0.2 rounded bg-black/70 text-[9px] font-bold text-white">
-                    {closestStation.priceTag}
+      {/* Unified Content Container:
+          Always renders full contents below the fold.
+          When in peek mode, only the top spotlight bar is visible.
+          Swiping up smoothly slides and expands the sheet, seamlessly revealing
+          the Action Buttons, Search & Filter Bar, and complete Station List below! */}
+      <div
+        className={`flex-1 flex flex-col px-4 pb-3 min-h-0 ${
+          sheetState === 'peek' ? 'overflow-hidden' : 'overflow-y-auto touch-scroll'
+        }`}
+        {...(sheetState === 'peek'
+          ? {
+              onTouchStart: handleTouchStart,
+              onTouchMove: handleTouchMove,
+              onTouchEnd: handleTouchEnd,
+            }
+          : {})}
+      >
+        {closestStation ? (
+          <div className="space-y-3 pb-4">
+            {/* Spotlit Station Header: Always visible in peek mode (~68px) */}
+            <div
+              onClick={() => onSelectStation(closestStation)}
+              className="flex items-center gap-3 cursor-pointer pt-0.5"
+            >
+              <div className="relative w-14 h-14 rounded-2xl overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800 shadow-xs">
+                <img
+                  src={closestStation.image}
+                  alt={closestStation.name}
+                  className="w-full h-full object-cover"
+                />
+                <span className="absolute bottom-1 left-1 px-1.5 py-0.2 rounded bg-black/75 text-[9px] font-bold text-white">
+                  {closestStation.priceTag}
+                </span>
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-1">
+                  <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400 truncate">
+                    {closestStation.distanceMeters !== undefined
+                      ? `${formatDistance(closestStation.distanceMeters)} • ${estimateWalkingTime(closestStation.distanceMeters)}`
+                      : 'Nearest station'}
+                  </span>
+                  <span className="flex items-center gap-0.5 text-[10px] font-bold text-amber-500 bg-amber-50 dark:bg-amber-950/40 px-1 py-0.5 rounded shrink-0">
+                    <Star size={10} />
+                    {closestStation.rating}
                   </span>
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-1">
-                    <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400">
-                      {closestStation.distanceMeters !== undefined
-                        ? `${formatDistance(closestStation.distanceMeters)} • ${estimateWalkingTime(closestStation.distanceMeters)}`
-                        : 'Nearest station'}
-                    </span>
-                    <span className="flex items-center gap-0.5 text-[10px] font-bold text-amber-500 bg-amber-50 dark:bg-amber-950/40 px-1 py-0.5 rounded">
-                      <Star size={10} />
-                      {closestStation.rating}
-                    </span>
-                  </div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate m-0">
+                  {closestStation.name}
+                </h3>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                  {closestStation.address}
+                </p>
 
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate m-0">
-                    {closestStation.name}
-                  </h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                    {closestStation.address}
-                  </p>
-
-                  <div className="flex gap-1 mt-1">
-                    {closestStation.waterTypes.slice(0, 2).map((t) => (
-                      <span
-                        key={t}
-                        className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-cyan-50 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300"
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
+                <div className="flex gap-1 mt-1">
+                  {closestStation.waterTypes.slice(0, 3).map((t) => (
+                    <span
+                      key={t}
+                      className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-cyan-50 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300"
+                    >
+                      {t}
+                    </span>
+                  ))}
                 </div>
               </div>
-
-              {/* Two large thumb-friendly buttons */}
-              <div className="grid grid-cols-2 gap-2.5 pt-2 pb-1">
-                <button
-                  onClick={() => onStartNavigation(closestStation)}
-                  className="py-3 px-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-xs"
-                >
-                  <Navigation size={15} className="text-cyan-600 dark:text-cyan-400" />
-                  <span>Navigate</span>
-                </button>
-
-                <button
-                  onClick={() => onQuickRefill(closestStation)}
-                  className="py-3 px-3 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 text-white text-xs font-bold shadow-md shadow-cyan-500/25 flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
-                >
-                  <Droplet size={15} />
-                  <span>Refill Here (+500ml)</span>
-                </button>
-              </div>
             </div>
-          ) : (
-            <div className="text-center py-4 text-xs text-slate-400">
-              No stations match filter. Tap handle to view all.
+
+            {/* ACTION BUTTONS:
+                Hidden below the fold in peek mode.
+                Smoothly revealed right beneath the station card as the sheet is swiped up! */}
+            <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100 dark:border-slate-800/60">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onStartNavigation(closestStation);
+                }}
+                className="py-2.5 px-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-xs"
+              >
+                <Navigation size={14} className="text-cyan-600 dark:text-cyan-400" />
+                <span>Navigate</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onQuickRefill(closestStation);
+                }}
+                className="py-2.5 px-3 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 text-white text-xs font-bold shadow-md shadow-cyan-500/25 flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+              >
+                <Droplet size={14} />
+                <span>Refill (+500ml)</span>
+              </button>
             </div>
-          )
-        ) : (
-          /* Half / Full Mode: Search, Filters, and Scrollable Station List */
-          <div className="flex-1 flex flex-col min-h-0 space-y-3">
-            {/* Filter and Search Bar */}
-            <div className="shrink-0">
+
+            {/* SEARCH & FILTERS BAR:
+                Revealed as user expands the sheet to browse stations */}
+            <div className="pt-2">
               <FilterBar
                 filters={filters}
                 onChangeFilters={onChangeFilters}
@@ -252,8 +280,13 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
               />
             </div>
 
-            {/* Scrollable List */}
-            <div className="flex-1 overflow-y-auto touch-scroll space-y-2.5 pr-0.5">
+            {/* COMPLETE NEARBY STATIONS LIST:
+                Smooth momentum scrolling through all refilling locations */}
+            <div className="space-y-2.5 pt-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-1">
+                All Nearby Refill Stations
+              </div>
+
               {stations.map((st) => (
                 <StationCard
                   key={st.id}
@@ -265,12 +298,13 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
                 />
               ))}
 
-              {/* Add Station Callout at bottom */}
-              <div className="p-3.5 rounded-2xl bg-cyan-50/70 dark:bg-cyan-950/40 border border-cyan-100 dark:border-cyan-900/50 text-center space-y-1.5">
+              {/* Add Station Community Callout */}
+              <div className="p-3.5 rounded-2xl bg-cyan-50/70 dark:bg-cyan-950/40 border border-cyan-100 dark:border-cyan-900/50 text-center space-y-1.5 mt-3">
                 <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">
                   Know a refilling station that's not listed here?
                 </p>
                 <button
+                  type="button"
                   onClick={onOpenAddStation}
                   className="text-xs font-bold text-cyan-600 dark:text-cyan-400 underline hover:no-underline cursor-pointer"
                 >
@@ -278,6 +312,10 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
                 </button>
               </div>
             </div>
+          </div>
+        ) : (
+          <div className="text-center py-6 text-xs text-slate-400">
+            No refilling stations match your filter criteria.
           </div>
         )}
       </div>
