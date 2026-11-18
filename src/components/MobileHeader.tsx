@@ -39,8 +39,8 @@ export const MobileHeader: FC<MobileHeaderProps> = ({
         </div>
 
         {/* Center: City Explorer Selector */}
-        <div className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-[11px] font-semibold text-slate-700 dark:text-slate-200 max-w-[150px] truncate">
-          <MapPin size={12} className="text-cyan-600 dark:text-cyan-400 shrink-0" />
+        <div className="flex items-center gap-1 px-2 py-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-[11px] font-semibold text-slate-700 dark:text-slate-200 max-w-[120px] sm:max-w-[150px] truncate">
+          <MapPin size={11} className="text-cyan-600 dark:text-cyan-400 shrink-0" />
           <select
             value={selectedCityName}
             onChange={(e) => {
@@ -58,10 +58,10 @@ export const MobileHeader: FC<MobileHeaderProps> = ({
         </div>
 
         {/* Right actions: Bottle Capacity Pill & QR button */}
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={onOpenBottleModal}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-cyan-50 dark:bg-cyan-950/70 border border-cyan-200 dark:border-cyan-800 text-cyan-800 dark:text-cyan-200 text-[11px] font-bold transition-all active:scale-95 cursor-pointer"
+            className="flex items-center gap-1 px-2 py-1 rounded-xl bg-cyan-50 dark:bg-cyan-950/70 border border-cyan-200 dark:border-cyan-800 text-cyan-800 dark:text-cyan-200 text-[11px] font-bold transition-all active:scale-95 cursor-pointer"
             title="Open Bottle Companion"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>

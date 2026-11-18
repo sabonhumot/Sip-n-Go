@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import type { FormEvent } from 'react';
 import { X, Check } from './Icons';
 import type { RefillStation, WaterType, UserLocation } from '../types';
@@ -23,7 +23,42 @@ export const AddStationModal: React.FC<AddStationModalProps> = ({
   const [waterTypes, setWaterTypes] = useState<WaterType[]>(['Filtered', 'Chilled']);
   const [indoorOutdoor, setIndoorOutdoor] = useState<'Indoor' | 'Outdoor'>('Outdoor');
 
+  const [dragOffsetY, setDragOffsetY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const touchStartY = useRef<number | null>(null);
+
   if (!isOpen) return null;
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+    setIsDragging(true);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartY.current === null) return;
+    const currentY = e.touches[0].clientY;
+    const deltaY = currentY - touchStartY.current;
+    if (deltaY > 0) {
+      setDragOffsetY(deltaY);
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartY.current === null) return;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+    setIsDragging(false);
+    touchStartY.current = null;
+
+    if (deltaY > 60) {
+      setDragOffsetY(350);
+      setTimeout(() => {
+        onClose();
+        setDragOffsetY(0);
+      }, 160);
+    } else {
+      setDragOffsetY(0);
+    }
+  };
 
   const toggleWaterType = (type: WaterType) => {
     if (waterTypes.includes(type)) {
@@ -73,18 +108,41 @@ export const AddStationModal: React.FC<AddStationModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+    >
       <div
-        className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-100 dark:border-slate-800 overflow-hidden text-left max-h-[88vh] overflow-y-auto"
+        style={{
+          transform: `translateY(${dragOffsetY}px)`,
+          transition: isDragging ? 'none' : 'transform 0.22s ease-out',
+        }}
+        className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-100 dark:border-slate-800 overflow-hidden text-left max-h-[90dvh] overflow-y-auto modal-pb-safe"
         role="dialog"
         aria-modal="true"
       >
-        {/* Mobile Pull Handle */}
-        <div className="sm:hidden absolute top-2 left-1/2 -translate-x-1/2 z-20 w-12 h-1.5 rounded-full bg-white/70"></div>
-        <div className="bg-gradient-to-r from-cyan-600 to-blue-600 p-6 text-white relative">
+        {/* Mobile Pull Handle with Swipe-Down Gesture */}
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          className="sm:hidden w-full pt-2.5 pb-1 flex justify-center cursor-pointer touch-none bg-gradient-to-r from-cyan-600 to-blue-600"
+          title="Swipe down to close"
+        >
+          <div className="w-12 h-1.5 rounded-full bg-white/70"></div>
+        </div>
+
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          className="bg-gradient-to-r from-cyan-600 to-blue-600 p-6 pt-4 text-white relative touch-none"
+        >
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white cursor-pointer"
+            className="absolute top-4 right-5 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -177,7 +235,7 @@ export const AddStationModal: React.FC<AddStationModalProps> = ({
             </div>
           </div>
 
-          <div className="pt-3">
+          <div className="pt-3 modal-pb-safe">
             <button
               type="submit"
               className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-sm shadow-md shadow-cyan-500/25 hover:from-cyan-600 hover:to-blue-700 transition-all cursor-pointer"

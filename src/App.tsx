@@ -23,6 +23,7 @@ import { MobileBottomNav } from './components/MobileBottomNav';
 import type { MobileTab } from './components/MobileBottomNav';
 import { NavigationHUD } from './components/NavigationHUD';
 import { BottleScanGate } from './components/BottleScanGate';
+import { ApologyTermsScreen } from './components/ApologyTermsScreen';
 import { Sparkles, Check, AlertTriangle, RefreshCw } from './components/Icons';
 
 // Initial Bottle profile
@@ -61,6 +62,16 @@ export const App: FC = () => {
     try {
       const saved = localStorage.getItem('sip_n_go_unlocked_bottle');
       return Boolean(saved);
+    } catch {
+      return false;
+    }
+  });
+
+  // Terms and conditions acceptance state (Apology letter)
+  const [isTermsAccepted, setIsTermsAccepted] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return localStorage.getItem('sip_n_go_terms_accepted') === 'true';
     } catch {
       return false;
     }
@@ -412,8 +423,23 @@ export const App: FC = () => {
   const handleLockBottle = () => {
     try {
       localStorage.removeItem('sip_n_go_unlocked_bottle');
+      localStorage.removeItem('sip_n_go_terms_accepted');
     } catch {}
     setIsBottleUnlocked(false);
+    setIsTermsAccepted(false);
+  };
+
+  const handleAcceptTerms = () => {
+    try {
+      localStorage.setItem('sip_n_go_terms_accepted', 'true');
+    } catch (e) {
+      console.warn('localStorage error:', e);
+    }
+    setIsTermsAccepted(true);
+    setCelebrationMessage('❤️ Dodong is forgiven! Welcome to Sip n Go.');
+    setTimeout(() => {
+      setCelebrationMessage(null);
+    }, 4500);
   };
 
   const handleSimulateScan = (bottleId: string) => {
@@ -455,12 +481,22 @@ export const App: FC = () => {
 
   const isNavigating = Boolean(navigatingStation && activeRoute);
 
-  // Require Bottle QR scan before unlocking website
+  // Step 1: Require Bottle QR scan before unlocking website
   if (!isBottleUnlocked) {
     return (
       <BottleScanGate
         onUnlockBottle={handleUnlockBottle}
         defaultBottleId={bottle.id || 'SIP-8821'}
+      />
+    );
+  }
+
+  // Step 2: After user scans bottle, require accepting Terms & Conditions (Apology to girlfriend)
+  if (!isTermsAccepted) {
+    return (
+      <ApologyTermsScreen
+        onAccept={handleAcceptTerms}
+        bottleId={bottle.id}
       />
     );
   }
@@ -537,7 +573,7 @@ export const App: FC = () => {
           selectedStation={selectedStation}
           onSelectStation={(st) => {
             setSelectedStation(st);
-            setInspectingStation(st);
+            // Pin click selects station on map and highlights in bottom sheet; does not open modal
           }}
           onLocateUser={requestUserLocation}
           isLocating={isLocating}

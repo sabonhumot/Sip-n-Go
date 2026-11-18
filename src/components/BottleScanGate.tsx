@@ -338,8 +338,8 @@ export const BottleScanGate: FC<BottleScanGateProps> = ({
               </p>
             </div>
           ) : isCameraActive ? (
-            /* Live Camera Viewfinder */
-            <div className="relative w-full max-w-xs aspect-square rounded-3xl overflow-hidden border-2 border-cyan-500 shadow-2xl shadow-cyan-500/25 bg-black flex items-center justify-center">
+            /* Live Camera Viewfinder (compact for mobile screens) */
+            <div className="relative w-full max-w-[260px] aspect-square mx-auto rounded-3xl overflow-hidden border-2 border-cyan-500 shadow-2xl shadow-cyan-500/25 bg-black flex items-center justify-center">
               <video
                 ref={videoRef}
                 className="w-full h-full object-cover"

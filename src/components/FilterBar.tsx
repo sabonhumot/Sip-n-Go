@@ -20,7 +20,7 @@ export const FilterBar: FC<FilterBarProps> = ({
   return (
     <div className="w-full space-y-3">
       {/* Search Bar & View switcher */}
-      <div className="flex flex-col sm:flex-row gap-2.5 items-center">
+      <div className="flex gap-2.5 items-center">
         {/* Search Input */}
         <div className="relative flex-1 w-full">
           <Search
@@ -44,8 +44,8 @@ export const FilterBar: FC<FilterBarProps> = ({
           )}
         </div>
 
-        {/* View toggles for tablet/mobile */}
-        <div className="flex items-center gap-1 p-1 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 shrink-0">
+        {/* View toggles for tablet/desktop */}
+        <div className="hidden sm:flex items-center gap-1 p-1 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 shrink-0">
           <button
             onClick={() => onToggleView('both')}
             className={`hidden md:block px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${

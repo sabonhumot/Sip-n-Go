@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import type { FC } from 'react';
 import {
   X,
@@ -28,8 +28,42 @@ export const StationDetailModal: FC<StationDetailModalProps> = ({
   onStartNavigation,
 }) => {
   const [refillSuccess, setRefillSuccess] = useState(false);
+  const [dragOffsetY, setDragOffsetY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const touchStartY = useRef<number | null>(null);
 
   if (!station) return null;
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+    setIsDragging(true);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartY.current === null) return;
+    const currentY = e.touches[0].clientY;
+    const deltaY = currentY - touchStartY.current;
+    if (deltaY > 0) {
+      setDragOffsetY(deltaY);
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartY.current === null) return;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+    setIsDragging(false);
+    touchStartY.current = null;
+
+    if (deltaY > 60) {
+      setDragOffsetY(350);
+      setTimeout(() => {
+        onClose();
+        setDragOffsetY(0);
+      }, 160);
+    } else {
+      setDragOffsetY(0);
+    }
+  };
 
   const handleRefill = () => {
     onRefillAtStation(station);
@@ -60,14 +94,33 @@ export const StationDetailModal: FC<StationDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+    >
       <div
-        className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-100 dark:border-slate-800 overflow-hidden max-h-[88vh] flex flex-col text-left"
+        style={{
+          transform: `translateY(${dragOffsetY}px)`,
+          transition: isDragging ? 'none' : 'transform 0.22s cubic-bezier(0.32, 0.72, 0, 1)',
+        }}
+        className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-100 dark:border-slate-800 overflow-hidden max-h-[90dvh] flex flex-col text-left"
         role="dialog"
         aria-modal="true"
       >
-        {/* Mobile Pull Handle */}
-        <div className="sm:hidden absolute top-2 left-1/2 -translate-x-1/2 z-20 w-12 h-1.5 rounded-full bg-white/70"></div>
+        {/* Mobile Pull Handle with swipe down to collapse */}
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onClick={onClose}
+          className="sm:hidden absolute top-0 left-0 right-0 z-30 pt-2.5 pb-4 flex items-center justify-center cursor-pointer select-none touch-none bg-gradient-to-b from-black/50 via-black/20 to-transparent"
+          title="Swipe down or tap to collapse"
+        >
+          <div className="w-12 h-1.5 rounded-full bg-white/85 shadow-sm active:scale-95 transition-transform"></div>
+        </div>
+
         {/* Hero image with status overlay */}
         <div className="relative h-52 sm:h-60 w-full overflow-hidden bg-slate-900">
           <img
@@ -80,7 +133,7 @@ export const StationDetailModal: FC<StationDetailModalProps> = ({
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md transition-all cursor-pointer z-10"
+            className="absolute top-4 right-4 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-md transition-all cursor-pointer z-30 shadow-md"
             aria-label="Close"
           >
             <X size={18} />
@@ -247,7 +300,7 @@ export const StationDetailModal: FC<StationDetailModalProps> = ({
           )}
 
           {/* Action Buttons */}
-          <div className="pt-2 flex flex-col sm:flex-row gap-3">
+          <div className="pt-2 flex flex-col sm:flex-row gap-3 modal-pb-safe">
             <button
               onClick={handleRefill}
               className="flex-1 py-3.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-600 hover:to-indigo-700 text-white font-bold text-sm shadow-lg shadow-cyan-500/25 flex items-center justify-center gap-2 transition-all transform active:scale-95 cursor-pointer"

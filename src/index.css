@@ -243,6 +243,12 @@ html, body {
 .pb-safe {
   padding-bottom: max(12px, env(safe-area-inset-bottom));
 }
+.bottom-sheet-base {
+  bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+}
+.modal-pb-safe {
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 1rem));
+}
 
 /* QR Camera Scanning Laser Animation */
 @keyframes laserSweep {

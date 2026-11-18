@@ -246,8 +246,8 @@ export const MapView: FC<MapViewProps> = ({
       {/* Map DOM Container */}
       <div ref={mapContainerRef} className="w-full h-full min-h-0 z-0" />
 
-      {/* Floating GPS and quick control buttons */}
-      <div className="absolute top-16 right-3 z-[400] flex flex-col gap-2">
+      {/* Floating GPS and quick control buttons (positioned safely below MobileHeader) */}
+      <div className="absolute top-[calc(max(12px,env(safe-area-inset-top,0px))+3.85rem)] right-3 z-10 flex flex-col gap-2">
         <button
           onClick={handleLocateMe}
           disabled={isLocating}
@@ -261,8 +261,8 @@ export const MapView: FC<MapViewProps> = ({
         </button>
       </div>
 
-      {/* Map Legend Overlay */}
-      <div className="absolute top-16 left-3 z-[400] px-3 py-1.5 rounded-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 shadow-md text-[10px] font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2.5">
+      {/* Map Legend Overlay (positioned safely below MobileHeader) */}
+      <div className="absolute top-[calc(max(12px,env(safe-area-inset-top,0px))+3.85rem)] left-3 z-10 px-3 py-1.5 rounded-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 shadow-md text-[10px] font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2.5">
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm shadow-blue-500/80 animate-pulse"></span>
           <span>You (Bottle)</span>

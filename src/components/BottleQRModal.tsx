@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import type { FC } from 'react';
 import { X, QrCode, Check, Droplet, Sparkles, RefreshCw, Download } from './Icons';
 import type { BottleData } from '../types';
@@ -52,20 +52,73 @@ export const BottleQRModal: FC<BottleQRModalProps> = ({
     }
   };
 
+  const [dragOffsetY, setDragOffsetY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const touchStartY = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+    setIsDragging(true);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartY.current === null) return;
+    const currentY = e.touches[0].clientY;
+    const deltaY = currentY - touchStartY.current;
+    if (deltaY > 0) {
+      setDragOffsetY(deltaY);
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartY.current === null) return;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+    setIsDragging(false);
+    touchStartY.current = null;
+
+    if (deltaY > 60) {
+      setDragOffsetY(350);
+      setTimeout(() => {
+        onClose();
+        setDragOffsetY(0);
+      }, 160);
+    } else {
+      setDragOffsetY(0);
+    }
+  };
+
   const handleSimulate = () => {
     onSimulateScan(activeBottleId);
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+    >
       <div 
-        className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-100 dark:border-slate-800 overflow-hidden max-h-[88vh] overflow-y-auto transform transition-all duration-300 scale-100"
+        style={{
+          transform: `translateY(${dragOffsetY}px)`,
+          transition: isDragging ? 'none' : 'transform 0.22s cubic-bezier(0.32, 0.72, 0, 1)',
+        }}
+        className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-100 dark:border-slate-800 overflow-hidden max-h-[90dvh] overflow-y-auto transform scale-100"
         role="dialog"
         aria-modal="true"
       >
-        {/* Mobile Pull Handle */}
-        <div className="sm:hidden absolute top-2 left-1/2 -translate-x-1/2 z-20 w-12 h-1.5 rounded-full bg-white/70"></div>
+        {/* Mobile Pull Handle with swipe down to collapse */}
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onClick={onClose}
+          className="sm:hidden absolute top-0 left-0 right-0 z-30 pt-2.5 pb-4 flex items-center justify-center cursor-pointer select-none touch-none bg-gradient-to-b from-black/40 via-black/15 to-transparent"
+          title="Swipe down or tap to collapse"
+        >
+          <div className="w-12 h-1.5 rounded-full bg-white/85 shadow-sm active:scale-95 transition-transform"></div>
+        </div>
         {/* Header gradient banner */}
         <div className="relative bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 p-6 text-white text-left">
           <button
@@ -152,7 +205,7 @@ export const BottleQRModal: FC<BottleQRModalProps> = ({
           </div>
 
           {/* Quick Actions */}
-          <div className="mt-5 flex flex-col sm:flex-row gap-2.5">
+          <div className="mt-5 flex flex-col sm:flex-row gap-2.5 modal-pb-safe">
             <button
               onClick={handleSimulate}
               className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold text-sm shadow-lg shadow-cyan-500/25 transition-all transform active:scale-95 cursor-pointer"
