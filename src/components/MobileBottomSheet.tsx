@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import type { FC } from 'react';
 import type { RefillStation, FilterOptions } from '../types';
 import { StationCard } from './StationCard';
@@ -19,6 +19,9 @@ interface MobileBottomSheetProps {
   onOpenAddStation: () => void;
 }
 
+// Resting height for peek state (fits handle + station spotlight + Navigate & Refill buttons)
+const PEEK_HEIGHT = 176;
+
 export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
   stations,
   selectedStation,
@@ -30,83 +33,113 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
   onOpenAddStation,
 }) => {
   const [sheetState, setSheetState] = useState<SheetState>('peek');
-  const [dragOffsetY, setDragOffsetY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [dragHeight, setDragHeight] = useState<number>(PEEK_HEIGHT);
+
   const touchStartY = useRef<number | null>(null);
+  const startHeight = useRef<number | null>(null);
 
   const closestStation = selectedStation || stations[0];
 
-  // Tap handler to toggle sheet state
+  const getHalfHeight = useCallback(() => {
+    if (typeof window === 'undefined') return 450;
+    return Math.round(window.innerHeight * 0.56);
+  }, []);
+
+  const getFullHeight = useCallback(() => {
+    if (typeof window === 'undefined') return 700;
+    return Math.max(PEEK_HEIGHT + 150, window.innerHeight - 90);
+  }, []);
+
+  // Tap handler to toggle between states
   const toggleSheet = () => {
     if (sheetState === 'peek') setSheetState('half');
     else if (sheetState === 'half') setSheetState('full');
     else setSheetState('peek');
   };
 
-  // Full Bidirectional Touch Swipe Gestures
+  // Continuous Swipe Gestures: Dragging adjusts height in real time so details reveal immediately
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartY.current = e.touches[0].clientY;
     setIsDragging(true);
+
+    let initialH = PEEK_HEIGHT;
+    if (sheetState === 'half') initialH = getHalfHeight();
+    else if (sheetState === 'full') initialH = getFullHeight();
+
+    startHeight.current = initialH;
+    setDragHeight(initialH);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (touchStartY.current === null) return;
+    if (touchStartY.current === null || startHeight.current === null) return;
     const currentY = e.touches[0].clientY;
+    // deltaY < 0 when dragging upwards, so subtracting deltaY increases the sheet's height
     const deltaY = currentY - touchStartY.current;
 
-    // Fluid drag physics depending on current state
-    if (sheetState === 'peek') {
-      // Swiping UP pulls sheet upward in real-time; slight resistance downwards
-      if (deltaY < 0) {
-        setDragOffsetY(deltaY);
-      } else {
-        setDragOffsetY(deltaY * 0.2);
-      }
-    } else if (sheetState === 'half') {
-      // Swiping UP pulls toward full; swiping DOWN pulls toward peek
-      setDragOffsetY(deltaY);
-    } else {
-      // Swiping DOWN pulls toward half/peek; slight resistance upwards
-      if (deltaY > 0) {
-        setDragOffsetY(deltaY);
-      } else {
-        setDragOffsetY(deltaY * 0.2);
-      }
+    const minH = PEEK_HEIGHT;
+    const maxH = getFullHeight();
+    let nextH = startHeight.current - deltaY;
+
+    // Fluid rubber-band resistance when pulling past limits
+    if (nextH < minH) {
+      nextH = minH - (minH - nextH) * 0.2;
+    } else if (nextH > maxH) {
+      nextH = maxH + (nextH - maxH) * 0.2;
     }
+
+    setDragHeight(Math.round(nextH));
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartY.current === null) return;
+    if (touchStartY.current === null || startHeight.current === null) return;
     const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+    const currentDragH = dragHeight;
+
     setIsDragging(false);
     touchStartY.current = null;
-    setDragOffsetY(0);
+    startHeight.current = null;
 
-    // If it was just a quick tap (<8px movement), toggle sheet
+    // Quick tap (<8px movement): toggle between view states
     if (Math.abs(deltaY) < 8) {
       toggleSheet();
       return;
     }
 
-    // Swipe UP threshold (< -35px)
-    if (deltaY < -35) {
-      if (sheetState === 'peek') {
-        setSheetState(deltaY < -120 ? 'full' : 'half');
-      } else if (sheetState === 'half') {
+    const halfH = getHalfHeight();
+    const fullH = getFullHeight();
+
+    // Snap to the closest resting state based on position and direction
+    if (sheetState === 'peek') {
+      if (currentDragH > halfH + 40 || deltaY < -160) {
         setSheetState('full');
-      }
-    }
-    // Swipe DOWN threshold (> 35px)
-    else if (deltaY > 35) {
-      if (sheetState === 'full') {
-        setSheetState(deltaY > 120 ? 'peek' : 'half');
-      } else if (sheetState === 'half') {
+      } else if (currentDragH > PEEK_HEIGHT + 40 || deltaY < -40) {
+        setSheetState('half');
+      } else {
         setSheetState('peek');
+      }
+    } else if (sheetState === 'half') {
+      if (currentDragH > halfH + 50 || deltaY < -50) {
+        setSheetState('full');
+      } else if (currentDragH < halfH - 50 || deltaY > 50) {
+        setSheetState('peek');
+      } else {
+        setSheetState('half');
+      }
+    } else {
+      // sheetState === 'full'
+      if (currentDragH < halfH - 40 || deltaY > 180) {
+        setSheetState('peek');
+      } else if (currentDragH < fullH - 50 || deltaY > 50) {
+        setSheetState('half');
+      } else {
+        setSheetState('full');
       }
     }
   };
 
-  const getHeightClass = () => {
+  // Return the resting CSS height when not actively dragging
+  const getRestingHeightStyle = () => {
     switch (sheetState) {
       case 'full':
         return 'h-[88dvh] max-h-[calc(100dvh-5.5rem)]';
@@ -114,25 +147,26 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
         return 'h-[56dvh]';
       case 'peek':
       default:
-        // Sleek compact height: reveals spotlight station bar, hides rest of contents below
-        return 'h-[122px]';
+        return 'h-[176px]';
     }
   };
 
   return (
     <div
       style={{
-        transform: `translateY(${dragOffsetY}px)`,
+        height: isDragging ? `${dragHeight}px` : undefined,
         transition: isDragging ? 'none' : undefined,
       }}
-      className={`fixed left-0 right-0 bottom-sheet-base z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-t-3xl border-t border-slate-200/80 dark:border-slate-800 shadow-2xl flex flex-col bottom-sheet-snap ${getHeightClass()}`}
+      className={`fixed left-0 right-0 bottom-sheet-base z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-t-3xl border-t border-slate-200/80 dark:border-slate-800 shadow-2xl flex flex-col bottom-sheet-snap ${
+        !isDragging ? getRestingHeightStyle() : ''
+      }`}
     >
-      {/* Draggable Handle Bar (pinned at top) */}
+      {/* Draggable Handle Bar (pinned at top with touch listeners) */}
       <div
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className="w-full pt-2.5 pb-1.5 flex flex-col items-center justify-center cursor-pointer select-none shrink-0 active:opacity-75 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors touch-none"
+        className="w-full pt-2.5 pb-1 flex flex-col items-center justify-center cursor-pointer select-none shrink-0 active:opacity-75 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors touch-none"
         title={sheetState === 'peek' ? 'Swipe up to reveal stations' : 'Swipe down to collapse'}
       >
         <div className="w-14 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600 transition-colors"></div>
@@ -171,31 +205,30 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
         </div>
       </div>
 
-      {/* Unified Content Container:
-          Always renders full contents below the fold.
-          When in peek mode, only the top spotlight bar is visible.
-          Swiping up smoothly slides and expands the sheet, seamlessly revealing
-          the Action Buttons, Search & Filter Bar, and complete Station List below! */}
+      {/* Unified Continuous Content Container:
+          - Both the Navigate and Refill buttons are PROMINENTLY visible in peek mode.
+          - As the user pulls up and holds, the sheet's height grows in real time,
+            smoothly revealing the Search & Filter bar and the entire station list beneath their finger! */}
       <div
         className={`flex-1 flex flex-col px-4 pb-3 min-h-0 ${
-          sheetState === 'peek' ? 'overflow-hidden' : 'overflow-y-auto touch-scroll'
+          sheetState === 'peek' && !isDragging ? 'overflow-hidden' : 'overflow-y-auto touch-scroll'
         }`}
-        {...(sheetState === 'peek'
-          ? {
-              onTouchStart: handleTouchStart,
-              onTouchMove: handleTouchMove,
-              onTouchEnd: handleTouchEnd,
-            }
-          : {})}
       >
         {closestStation ? (
-          <div className="space-y-3 pb-4">
-            {/* Spotlit Station Header: Always visible in peek mode (~68px) */}
+          <div className="space-y-2.5 pb-4">
+            {/* Nearest / Selected Station Spotlight Area */}
             <div
+              {...(sheetState === 'peek'
+                ? {
+                    onTouchStart: handleTouchStart,
+                    onTouchMove: handleTouchMove,
+                    onTouchEnd: handleTouchEnd,
+                  }
+                : {})}
               onClick={() => onSelectStation(closestStation)}
               className="flex items-center gap-3 cursor-pointer pt-0.5"
             >
-              <div className="relative w-14 h-14 rounded-2xl overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800 shadow-xs">
+              <div className="relative w-15 h-15 rounded-2xl overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800 shadow-xs">
                 <img
                   src={closestStation.image}
                   alt={closestStation.name}
@@ -239,12 +272,12 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
               </div>
             </div>
 
-            {/* ACTION BUTTONS:
-                Hidden below the fold in peek mode.
-                Smoothly revealed right beneath the station card as the sheet is swiped up! */}
-            <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100 dark:border-slate-800/60">
+            {/* NAVIGATE AND REFILL BUTTONS:
+                Always visible in peek state so user can immediately take action without opening the sheet! */}
+            <div className="grid grid-cols-2 gap-2 pt-0.5">
               <button
                 type="button"
+                onTouchStart={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.stopPropagation();
                   onStartNavigation(closestStation);
@@ -257,6 +290,7 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
 
               <button
                 type="button"
+                onTouchStart={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.stopPropagation();
                   onQuickRefill(closestStation);
@@ -269,8 +303,8 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
             </div>
 
             {/* SEARCH & FILTERS BAR:
-                Revealed as user expands the sheet to browse stations */}
-            <div className="pt-2">
+                Revealed continuously in real time as the user drags the sheet upward */}
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60">
               <FilterBar
                 filters={filters}
                 onChangeFilters={onChangeFilters}
@@ -281,7 +315,7 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
             </div>
 
             {/* COMPLETE NEARBY STATIONS LIST:
-                Smooth momentum scrolling through all refilling locations */}
+                Smooth continuous momentum scrolling through all refilling locations */}
             <div className="space-y-2.5 pt-1">
               <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-1">
                 All Nearby Refill Stations

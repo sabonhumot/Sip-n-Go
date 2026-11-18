@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import type { FC } from 'react';
 import { Heart, Sparkles, Check } from './Icons';
 
@@ -11,69 +11,111 @@ export const ApologyTermsScreen: FC<ApologyTermsScreenProps> = ({
   onAccept,
   bottleId,
 }) => {
-  const [declineOffset, setDeclineOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [hasMoved, setHasMoved] = useState<boolean>(false);
+  const [position, setPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [declineAttempts, setDeclineAttempts] = useState<number>(0);
   const [isAccepted, setIsAccepted] = useState<boolean>(false);
   const [playfulNote, setPlayfulNote] = useState<string | null>(null);
 
+  const acceptButtonRef = useRef<HTMLButtonElement | null>(null);
+
   const playfulMessages = [
     'Oops! Button slipped away 💨',
-    'Decline ran away! Say yes please 🥺',
-    'Too fast! Dodong is very sorry ❤️',
+    'Too fast! Dodong is very sorry 🥺',
+    'Decline dashed away! Say yes please ❤️',
     'No declining allowed! You must forgive Dodong 💖',
     'Dodong loves you way too much to let you decline 🥰',
     'Just tap Accept already! 💕',
+    'You cannot escape Dodong’s love! 🏃‍♂️💨',
   ];
 
   const declineButtonLabels = [
     'Decline',
     'Oops! Slipped 💨',
     'Too slow! 🏃‍♂️',
-    'Can’t click me! 🙈',
+    'Over here! 😜',
+    'Can’t catch me! 🙈',
     'Dodong is sorry! 🥺',
+    'Still can’t click! 😂',
     'Only Accept works ❤️',
   ];
 
-  // Runaway button mechanic: teleports whenever hovered, touched, or tapped
-  // Guarantees it NEVER proceeds and ALWAYS dashes away from finger/cursor
-  const runAway = useCallback((e?: React.SyntheticEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+  // True Runaway Button Mechanic:
+  // Upon first touch or hover, switches to fixed viewport positioning
+  // and dashes across the whole screen to different random safe coordinates!
+  const runAway = useCallback(
+    (e?: React.SyntheticEvent) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
 
-    setDeclineOffset((prev) => {
-      // Pick random direction with minimum displacement of 80px horizontally and 25px vertically
-      const dirX = prev.x >= 0 ? -1 : 1;
-      const dirY = prev.y >= 0 ? -1 : 1;
+      setHasMoved(true);
 
-      // Random jitter
-      const distanceX = 75 + Math.random() * 45; // 75px to 120px
-      const distanceY = 20 + Math.random() * 25; // 20px to 45px
+      const winW = typeof window !== 'undefined' ? window.innerWidth : 375;
+      const winH = typeof window !== 'undefined' ? window.innerHeight : 700;
 
-      let newX = dirX * distanceX;
-      let newY = dirY * distanceY;
+      // Estimated button dimensions
+      const btnW = 145;
+      const btnH = 44;
 
-      // Clamp within safe mobile arena bounds [-110, 110] x [-35, 35]
-      newX = Math.max(-110, Math.min(110, newX));
-      newY = Math.max(-35, Math.min(35, newY));
+      // Safe bounds across the entire viewport (padding around edges)
+      const minX = 20;
+      const maxX = Math.max(minX + 30, winW - btnW - 20);
+      const minY = 90; // below top header
+      const maxY = Math.max(minY + 60, winH - btnH - 60);
 
-      return { x: Math.round(newX), y: Math.round(newY) };
-    });
+      const acceptRect = acceptButtonRef.current?.getBoundingClientRect();
 
-    setDeclineAttempts((prev) => {
-      const next = prev + 1;
-      setPlayfulNote(playfulMessages[(next - 1) % playfulMessages.length]);
-      return next;
-    });
+      setPosition((prev) => {
+        let attempts = 0;
+        let chosenX = minX + 20;
+        let chosenY = minY + 50;
 
-    // Mobile haptic vibration if supported
-    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-      try {
-        navigator.vibrate([25, 35]);
-      } catch {}
-    }
-  }, [playfulMessages]);
+        // Find a random spot across the screen that is at least 110px from previous position
+        // and does NOT overlap the Accept button
+        while (attempts < 20) {
+          attempts++;
+          const candidateX = Math.round(minX + Math.random() * (maxX - minX));
+          const candidateY = Math.round(minY + Math.random() * (maxY - minY));
+
+          // Ensure it jumps noticeably away from current position
+          const dist = Math.hypot(candidateX - prev.x, candidateY - prev.y);
+          if (dist < 110 && prev.x !== 0) continue;
+
+          // Ensure it doesn't overlap the Accept button
+          if (acceptRect) {
+            const overlapsAccept =
+              candidateX < acceptRect.right + 15 &&
+              candidateX + btnW > acceptRect.left - 15 &&
+              candidateY < acceptRect.bottom + 20 &&
+              candidateY + btnH > acceptRect.top - 20;
+            if (overlapsAccept) continue;
+          }
+
+          chosenX = candidateX;
+          chosenY = candidateY;
+          break;
+        }
+
+        return { x: chosenX, y: chosenY };
+      });
+
+      setDeclineAttempts((prev) => {
+        const next = prev + 1;
+        setPlayfulNote(playfulMessages[(next - 1) % playfulMessages.length]);
+        return next;
+      });
+
+      // Mobile haptic vibration if supported
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        try {
+          navigator.vibrate([30, 45]);
+        } catch {}
+      }
+    },
+    [playfulMessages]
+  );
 
   const handleAcceptClick = () => {
     setIsAccepted(true);
@@ -158,7 +200,7 @@ export const ApologyTermsScreen: FC<ApologyTermsScreenProps> = ({
               {/* Exact required text prominently highlighted */}
               <div className="p-3.5 rounded-2xl bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200/80 text-rose-950">
                 <p className="text-sm font-black text-rose-600 tracking-tight m-0">
-                  "Im very sorry. Can you forgive dodong?"
+                  "Im very sorry. Can you forgive dodong?" 🥺
                 </p>
               </div>
 
@@ -200,7 +242,7 @@ export const ApologyTermsScreen: FC<ApologyTermsScreenProps> = ({
 
         {/* Playful hint / message when decline is tapped */}
         {playfulNote && (
-          <div className="mt-3 py-2 px-3.5 rounded-2xl bg-rose-100/90 border border-rose-300 text-rose-800 text-xs font-bold text-center animate-bounce shadow-sm">
+          <div className="mt-3 py-2 px-3.5 rounded-2xl bg-rose-100/90 border border-rose-300 text-rose-800 text-xs font-bold text-center animate-slide-down shadow-sm">
             {playfulNote}
           </div>
         )}
@@ -215,8 +257,9 @@ export const ApologyTermsScreen: FC<ApologyTermsScreenProps> = ({
             </div>
           ) : (
             <>
-              {/* PRIMARY ACCEPT BUTTON - ALWAYS CLEANLY SEPARATED */}
+              {/* PRIMARY ACCEPT BUTTON */}
               <button
+                ref={acceptButtonRef}
                 type="button"
                 onClick={handleAcceptClick}
                 className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-600 to-cyan-600 hover:from-rose-600 hover:to-cyan-700 text-white font-black text-sm shadow-xl shadow-rose-500/25 transition-all transform active:scale-95 cursor-pointer flex items-center justify-center gap-2"
@@ -225,8 +268,11 @@ export const ApologyTermsScreen: FC<ApologyTermsScreenProps> = ({
                 <span>Accept & Forgive Dodong ❤️</span>
               </button>
 
-              {/* DEDICATED DECLINE ARENA - GUARANTEED RUNAWAY ON TOUCH & CLICK */}
-              <div className="relative h-14 w-full flex items-center justify-center overflow-hidden select-none">
+              {/* RUNAWAY DECLINE BUTTON:
+                  - In resting state, sits neatly below Accept button.
+                  - On hover, touch, or tap, breaks out to fixed viewport positioning
+                    and dynamically runs to random corners across the entire screen! */}
+              <div className="relative min-h-[46px] w-full flex items-center justify-center select-none">
                 <button
                   type="button"
                   onTouchStart={runAway}
@@ -237,11 +283,18 @@ export const ApologyTermsScreen: FC<ApologyTermsScreenProps> = ({
                   onPointerDown={runAway}
                   onMouseEnter={runAway}
                   onClick={runAway}
-                  style={{
-                    transform: `translate(${declineOffset.x}px, ${declineOffset.y}px)`,
-                    transition: 'transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                  }}
-                  className="py-2.5 px-6 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 text-xs font-semibold border border-slate-200 cursor-pointer shadow-xs select-none touch-none active:scale-90"
+                  style={
+                    hasMoved
+                      ? {
+                          position: 'fixed',
+                          left: `${position.x}px`,
+                          top: `${position.y}px`,
+                          zIndex: 100,
+                          transition: 'all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                        }
+                      : undefined
+                  }
+                  className="py-2.5 px-6 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 dark:text-slate-400 text-xs font-bold border border-slate-200 shadow-md select-none touch-none active:scale-90 cursor-pointer"
                 >
                   {currentButtonLabel}
                 </button>
