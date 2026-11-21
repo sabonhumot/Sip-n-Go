@@ -21,7 +21,7 @@ export const MobileHeader: FC<MobileHeaderProps> = ({
   onOpenQR,
 }) => {
   return (
-    <header className="fixed top-0 left-0 right-0 z-30 pt-safe px-3 pb-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60 shadow-sm">
+    <header className="app-header fixed top-0 left-0 right-0 z-30 pt-safe px-3 pb-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60 shadow-sm">
       <div className="flex items-center justify-between gap-2">
         {/* Brand Logo & Name */}
         <div className="flex items-center gap-2 shrink-0">
@@ -33,7 +33,7 @@ export const MobileHeader: FC<MobileHeaderProps> = ({
               Sip <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600">n</span> Go
             </div>
             <span className="text-[9px] font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-widest leading-none">
-              Smart Water
+              Refill companion
             </span>
           </div>
         </div>

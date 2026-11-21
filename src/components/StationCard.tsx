@@ -52,7 +52,7 @@ export const StationCard: FC<StationCardProps> = ({
   return (
     <div
       onClick={() => onSelect(station)}
-      className={`group relative rounded-2xl p-4 transition-all duration-200 text-left cursor-pointer border ${
+      className={`station-card group relative rounded-2xl p-4 transition-all duration-200 text-left cursor-pointer border ${
         isSelected
           ? 'bg-cyan-50/70 dark:bg-slate-800/90 border-cyan-500 ring-2 ring-cyan-400/30 shadow-lg'
           : 'bg-white dark:bg-slate-900/80 border-slate-200/80 dark:border-slate-800/80 hover:border-cyan-300 dark:hover:border-slate-700 hover:shadow-md'
@@ -92,10 +92,12 @@ export const StationCard: FC<StationCardProps> = ({
               </span>
             </div>
 
-            <div className="flex items-center gap-1 text-[11px] font-bold text-amber-500 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded-md border border-amber-200 dark:border-amber-900/50">
-              <Star size={11} />
-              <span>{station.rating}</span>
-            </div>
+            {station.reviewCount > 0 && (
+              <div className="flex items-center gap-1 text-[11px] font-bold text-amber-500 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded-md border border-amber-200 dark:border-amber-900/50">
+                <Star size={11} />
+                <span>{station.rating}</span>
+              </div>
+            )}
           </div>
 
           {/* Station Name */}

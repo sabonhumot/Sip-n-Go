@@ -295,7 +295,7 @@ export const BottleScanGate: FC<BottleScanGateProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-gradient-to-b from-sky-50/80 via-slate-50 to-white text-slate-900 overflow-y-auto touch-scroll">
+    <div className="scan-gate fixed inset-0 z-50 flex flex-col bg-gradient-to-b from-sky-50/80 via-slate-50 to-white text-slate-900 overflow-y-auto touch-scroll">
       {/* Background ambient lighting (soft, clean, light mode) */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-32 -left-32 w-80 h-80 bg-cyan-200/40 rounded-full blur-3xl"></div>
@@ -307,7 +307,7 @@ export const BottleScanGate: FC<BottleScanGateProps> = ({
       <canvas ref={canvasRef} className="hidden" />
 
       {/* Top Header Bar */}
-      <header className="relative z-10 pt-safe px-5 pb-3 flex items-center justify-between border-b border-slate-200/80 bg-white/80 backdrop-blur-md shadow-xs">
+      <header className="scan-gate-header relative z-10 pt-safe px-5 pb-3 flex items-center justify-between border-b border-slate-200/80 bg-white/80 backdrop-blur-md shadow-xs">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-md shadow-cyan-500/20 text-white">
             <Droplet size={18} className="fill-white" />
@@ -329,23 +329,23 @@ export const BottleScanGate: FC<BottleScanGateProps> = ({
       </header>
 
       {/* Main Content Container */}
-      <main className="relative z-10 flex-1 max-w-md mx-auto w-full px-5 py-6 flex flex-col justify-between">
+      <main className="scan-gate-main relative z-10 flex-1 max-w-md mx-auto w-full px-5 py-6 flex flex-col justify-between">
         {/* Intro Banner */}
-        <div className="text-center mb-5">
+        <div className="scan-gate-intro text-center mb-5">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-100/70 border border-cyan-200 text-cyan-800 text-xs font-semibold mb-3">
             <Sparkles size={13} className="text-cyan-600" />
             <span>Bottle Authentication</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 m-0">
-            Scan Your Bottle to Enter
+            Your bottle opens the map.
           </h1>
           <p className="text-slate-600 text-xs sm:text-sm mt-2 leading-relaxed">
-            Sip n Go connects your physical bottle to free filtered refill stations, cold water spots, and automatic hydration tracking.
+            Scan your Sip n Go bottle to find nearby refill stations and keep track of every refill.
           </p>
         </div>
 
         {/* Scan Interactive Area */}
-        <div className="flex-1 flex flex-col items-center justify-center">
+        <div className="scan-gate-stage flex-1 flex flex-col items-center justify-center">
           {/* Success Overlay state */}
           {scannedSuccessId ? (
             <div className="w-full max-w-sm p-6 rounded-3xl bg-white border-2 border-emerald-500 shadow-2xl shadow-emerald-500/15 text-center animate-fade-in">

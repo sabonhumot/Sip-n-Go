@@ -157,7 +157,7 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
         height: isDragging ? `${dragHeight}px` : undefined,
         transition: isDragging ? 'none' : undefined,
       }}
-      className={`fixed left-0 right-0 bottom-sheet-base z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-t-3xl border-t border-slate-200/80 dark:border-slate-800 shadow-2xl flex flex-col bottom-sheet-snap ${
+      className={`station-sheet fixed left-0 right-0 bottom-sheet-base z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-t-3xl border-t border-slate-200/80 dark:border-slate-800 shadow-2xl flex flex-col bottom-sheet-snap ${
         !isDragging ? getRestingHeightStyle() : ''
       }`}
     >
@@ -166,6 +166,19 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        onClick={() => {
+          if (window.matchMedia('(hover: hover)').matches) toggleSheet();
+        }}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            toggleSheet();
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-expanded={sheetState !== 'peek'}
+        aria-label={sheetState === 'peek' ? 'Show nearby stations' : 'Change station list height'}
         className="w-full pt-2.5 pb-1 flex flex-col items-center justify-center cursor-pointer select-none shrink-0 active:opacity-75 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors touch-none"
         title={sheetState === 'peek' ? 'Swipe up to reveal stations' : 'Swipe down to collapse'}
       >
@@ -191,12 +204,12 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
             <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold flex items-center gap-0.5">
               {sheetState === 'peek' ? (
                 <>
-                  <span>Swipe up to explore</span>
+            <span>More stations</span>
                   <ChevronUp size={11} className="text-cyan-500 animate-bounce" />
                 </>
               ) : (
                 <>
-                  <span>Swipe down to collapse</span>
+                  <span>Collapse list</span>
                   <ChevronDown size={11} />
                 </>
               )}
@@ -250,10 +263,12 @@ export const MobileBottomSheet: FC<MobileBottomSheetProps> = ({
                       ? `${formatDistance(closestStation.distanceMeters)} • ${estimateWalkingTime(closestStation.distanceMeters)}`
                       : 'Nearest station'}
                   </span>
-                  <span className="flex items-center gap-0.5 text-[10px] font-bold text-amber-500 bg-amber-50 dark:bg-amber-950/40 px-1 py-0.5 rounded shrink-0">
-                    <Star size={10} />
-                    {closestStation.rating}
-                  </span>
+                  {closestStation.reviewCount > 0 && (
+                    <span className="flex items-center gap-0.5 text-[10px] font-bold text-amber-500 bg-amber-50 dark:bg-amber-950/40 px-1 py-0.5 rounded shrink-0">
+                      <Star size={10} />
+                      {closestStation.rating}
+                    </span>
+                  )}
                 </div>
 
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate m-0">

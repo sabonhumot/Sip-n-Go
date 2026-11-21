@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { FC } from 'react';
 import { X, QrCode, Check, Droplet, Sparkles, RefreshCw, Download } from './Icons';
 import type { BottleData } from '../types';
@@ -18,6 +18,16 @@ export const BottleQRModal: FC<BottleQRModalProps> = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const [activeBottleId, setActiveBottleId] = useState(bottle.id);
+  const [dragOffsetY, setDragOffsetY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const touchStartY = useRef<number | null>(null);
+
+  // Sync activeBottleId when bottle prop updates
+  useEffect(() => {
+    if (bottle?.id) {
+      setActiveBottleId(bottle.id);
+    }
+  }, [bottle?.id]);
 
   if (!isOpen) return null;
 
@@ -51,10 +61,6 @@ export const BottleQRModal: FC<BottleQRModalProps> = ({
       window.open(qrImageUrl, '_blank');
     }
   };
-
-  const [dragOffsetY, setDragOffsetY] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const touchStartY = useRef<number | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartY.current = e.touches[0].clientY;

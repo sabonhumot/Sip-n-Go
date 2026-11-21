@@ -141,10 +141,12 @@ export const StationDetailModal: FC<StationDetailModalProps> = ({
 
           {/* Floating badges on photo */}
           <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-            <span className="px-3 py-1 rounded-full bg-emerald-500/90 backdrop-blur-md text-white text-xs font-bold flex items-center gap-1 shadow-md">
-              <CheckCircle2 size={13} />
-              {station.status}
-            </span>
+            {station.reviewCount > 0 && (
+              <span className="px-3 py-1 rounded-full bg-emerald-500/90 backdrop-blur-md text-white text-xs font-bold flex items-center gap-1 shadow-md">
+                <CheckCircle2 size={13} />
+                {station.status}
+              </span>
+            )}
             {station.verified && (
               <span className="px-3 py-1 rounded-full bg-cyan-500/90 backdrop-blur-md text-white text-xs font-bold flex items-center gap-1 shadow-md">
                 <ShieldCheck size={13} />
@@ -183,11 +185,13 @@ export const StationDetailModal: FC<StationDetailModalProps> = ({
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 bg-amber-400/20 text-amber-700 dark:text-amber-300 px-2.5 py-1 rounded-xl text-xs font-bold border border-amber-300/40">
-                <Star size={14} />
-                <span>{station.rating}</span>
-                <span className="text-[10px] text-slate-400 font-normal">({station.reviewCount})</span>
-              </div>
+              {station.reviewCount > 0 && (
+                <div className="flex items-center gap-1 bg-amber-400/20 text-amber-700 dark:text-amber-300 px-2.5 py-1 rounded-xl text-xs font-bold border border-amber-300/40">
+                  <Star size={14} />
+                  <span>{station.rating}</span>
+                  <span className="text-[10px] text-slate-400 font-normal">({station.reviewCount})</span>
+                </div>
+              )}
               <div className="text-right">
                 <span className="text-[10px] text-slate-400 block font-medium">Hours</span>
                 <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
@@ -218,6 +222,7 @@ export const StationDetailModal: FC<StationDetailModalProps> = ({
           </div>
 
           {/* Real-time Water Quality Lab Metrics */}
+          {station.metrics.tds > 0 && (
           <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
@@ -259,6 +264,7 @@ export const StationDetailModal: FC<StationDetailModalProps> = ({
               </div>
             </div>
           </div>
+          )}
 
           {/* Description & Features */}
           <div>

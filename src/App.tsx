@@ -23,7 +23,6 @@ import { MobileBottomNav } from './components/MobileBottomNav';
 import type { MobileTab } from './components/MobileBottomNav';
 import { NavigationHUD } from './components/NavigationHUD';
 import { BottleScanGate } from './components/BottleScanGate';
-import { ApologyTermsScreen } from './components/ApologyTermsScreen';
 import { Sparkles, Check, AlertTriangle, RefreshCw } from './components/Icons';
 
 // Initial Bottle profile
@@ -62,16 +61,6 @@ export const App: FC = () => {
     try {
       const saved = localStorage.getItem('sip_n_go_unlocked_bottle');
       return Boolean(saved);
-    } catch {
-      return false;
-    }
-  });
-
-  // Terms and conditions acceptance state (Apology letter to girlfriend)
-  const [isTermsAccepted, setIsTermsAccepted] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    try {
-      return localStorage.getItem('sip_n_go_terms_accepted') === 'true';
     } catch {
       return false;
     }
@@ -117,14 +106,14 @@ export const App: FC = () => {
 
   const [justScannedNotice, setJustScannedNotice] = useState<string | null>(null);
 
-  // Location State (Default to Cebu City)
+  // Location State (Default to the CIT-U demo area)
   const [userLocation, setUserLocation] = useState<UserLocation>({
-    lat: 10.3297,
-    lng: 123.9059,
-    city: 'Cebu City (I.T. Park)',
+    lat: 10.29578,
+    lng: 123.88047,
+    city: 'Cebu City (CIT-U)',
     isSimulated: true,
   });
-  const [selectedCityName, setSelectedCityName] = useState<string>('Cebu City (I.T. Park)');
+  const [selectedCityName, setSelectedCityName] = useState<string>('Cebu City (CIT-U)');
   const [isLocating, setIsLocating] = useState<boolean>(false);
   const [locationErrorNotice, setLocationErrorNotice] = useState<string | null>(null);
 
@@ -292,9 +281,7 @@ export const App: FC = () => {
     }
     const merged = [...customList, ...nearby];
     setStations(merged);
-    if (merged.length > 0 && !selectedStation) {
-      setSelectedStation(merged[0]);
-    }
+    setSelectedStation(merged[0] ?? null);
   }, [userLocation.lat, userLocation.lng]);
 
   const handleSelectCity = (city: (typeof PRESET_CITIES)[0]) => {
@@ -423,23 +410,8 @@ export const App: FC = () => {
   const handleLockBottle = () => {
     try {
       localStorage.removeItem('sip_n_go_unlocked_bottle');
-      localStorage.removeItem('sip_n_go_terms_accepted');
     } catch {}
     setIsBottleUnlocked(false);
-    setIsTermsAccepted(false);
-  };
-
-  const handleAcceptTerms = () => {
-    try {
-      localStorage.setItem('sip_n_go_terms_accepted', 'true');
-    } catch (e) {
-      console.warn('localStorage error:', e);
-    }
-    setIsTermsAccepted(true);
-    setCelebrationMessage('❤️ Dodong is forgiven! Welcome to Sip n Go.');
-    setTimeout(() => {
-      setCelebrationMessage(null);
-    }, 4500);
   };
 
   const handleSimulateScan = (bottleId: string) => {
@@ -481,7 +453,7 @@ export const App: FC = () => {
 
   const isNavigating = Boolean(navigatingStation && activeRoute);
 
-  // Step 1: Require Bottle QR scan before unlocking website
+  // Require a bottle QR scan before opening the map.
   if (!isBottleUnlocked) {
     return (
       <BottleScanGate
@@ -491,18 +463,8 @@ export const App: FC = () => {
     );
   }
 
-  // Step 2: After user scans bottle, require accepting Terms & Conditions (Apology to girlfriend)
-  if (!isTermsAccepted) {
-    return (
-      <ApologyTermsScreen
-        onAccept={handleAcceptTerms}
-        bottleId={bottle.id}
-      />
-    );
-  }
-
   return (
-    <div className="relative w-full h-[100dvh] overflow-hidden bg-slate-900 text-slate-900 dark:text-slate-100 flex flex-col font-sans select-none">
+    <div className="app-shell relative w-full h-[100dvh] overflow-hidden bg-slate-900 text-slate-900 dark:text-slate-100 flex flex-col font-sans select-none">
       {/* Floating Mobile Header (hidden during active turn-by-turn navigation for clean HUD) */}
       {!isNavigating && (
         <MobileHeader

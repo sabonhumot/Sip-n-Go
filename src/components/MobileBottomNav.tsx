@@ -15,7 +15,7 @@ export const MobileBottomNav: FC<MobileBottomNavProps> = ({
   intakePercent,
 }) => {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/80 dark:border-slate-800 shadow-2xl pb-safe">
+    <nav className="app-bottom-nav fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/80 dark:border-slate-800 shadow-2xl pb-safe">
       <div className="max-w-md mx-auto px-4 h-16 flex items-center justify-around">
         {/* Tab 1: Explore Map */}
         <button

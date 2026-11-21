@@ -285,3 +285,160 @@ html, body {
   animation: laserSweep 1.8s ease-in-out infinite alternate;
 }
 
+/* Sip n Go interface: calm surfaces keep the map and station information first. */
+:root {
+  --sip-ink: #142d35;
+  --sip-blue: #087e91;
+  --sip-border: #dce7e7;
+  --sip-paper: #f7faf9;
+}
+
+button, select, input { font: inherit; }
+button { transition: transform .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease; }
+button:hover { transform: translateY(-2px); }
+button:active { transform: translateY(0) scale(.98); }
+:focus-visible { outline: 3px solid #14a8bc !important; outline-offset: 3px; }
+
+.scan-gate {
+  background: var(--sip-paper) !important;
+  color: var(--sip-ink);
+}
+.scan-gate > div:first-child { opacity: .22; }
+.scan-gate-header {
+  min-height: 76px;
+  padding-inline: clamp(20px, 5vw, 72px);
+  background: rgba(247,250,249,.93) !important;
+  border-color: var(--sip-border) !important;
+  box-shadow: none !important;
+}
+.scan-gate-header .bg-gradient-to-tr,
+.app-header .bg-gradient-to-tr {
+  background: var(--sip-blue) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+.scan-gate-main {
+  max-width: 640px !important;
+  justify-content: flex-start !important;
+  gap: 24px;
+  padding-top: clamp(32px, 6vh, 80px) !important;
+  padding-bottom: 40px !important;
+}
+.scan-gate-intro { text-align: left !important; margin-bottom: 0 !important; }
+.scan-gate-intro > div:first-child {
+  background: #e4f1ef !important;
+  border-color: #c5e0dd !important;
+  color: #176b70 !important;
+  border-radius: 8px !important;
+  padding: 8px 11px !important;
+  margin-bottom: 18px !important;
+}
+.scan-gate-intro h1 {
+  max-width: 590px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(38px, 6vw, 64px) !important;
+  line-height: 1.04;
+  letter-spacing: -.055em;
+  font-weight: 700 !important;
+  color: var(--sip-ink) !important;
+}
+.scan-gate-intro p {
+  max-width: 510px;
+  font-size: 16px !important;
+  line-height: 1.6 !important;
+  margin-top: 20px !important;
+  color: #4d6870 !important;
+}
+.scan-gate-stage { flex: none !important; justify-content: flex-start !important; }
+.scan-gate-stage > div { max-width: 100% !important; }
+.scan-gate-stage .aspect-square {
+  width: min(100%, 360px) !important;
+  border-radius: 20px !important;
+  border-color: var(--sip-blue) !important;
+  box-shadow: 0 20px 55px rgba(20,45,53,.14) !important;
+}
+.scan-gate-stage .bg-white,
+.scan-gate-main .bg-white { box-shadow: 0 14px 50px rgba(20,45,53,.07) !important; border-color: var(--sip-border) !important; }
+.scan-gate-main .bg-gradient-to-r { background: var(--sip-blue) !important; box-shadow: none !important; }
+.scan-gate-main button { min-height: 44px; }
+
+.app-shell { background: #e9f1ef !important; color: var(--sip-ink); }
+.app-header {
+  padding-inline: 18px !important;
+  padding-bottom: 10px !important;
+  background: rgba(255,255,255,.96) !important;
+  border-color: var(--sip-border) !important;
+  box-shadow: 0 4px 20px rgba(20,45,53,.04) !important;
+}
+.app-header .font-black { color: var(--sip-ink) !important; font-family: 'Space Grotesk', sans-serif; letter-spacing: -.045em; }
+.app-header .text-transparent { color: var(--sip-blue) !important; -webkit-text-fill-color: var(--sip-blue); }
+.app-header select { color: var(--sip-ink) !important; }
+.station-sheet {
+  background: rgba(255,255,255,.98) !important;
+  border-color: var(--sip-border) !important;
+  border-radius: 24px 24px 0 0 !important;
+  box-shadow: 0 -12px 46px rgba(18,58,65,.13) !important;
+}
+.station-sheet h3 { color: var(--sip-ink) !important; font-family: 'Space Grotesk', sans-serif; letter-spacing: -.025em; }
+.station-sheet .bg-gradient-to-r, .app-bottom-nav .bg-gradient-to-tr { background: var(--sip-blue) !important; box-shadow: none !important; }
+.station-sheet .text-cyan-600, .station-sheet .text-cyan-700 { color: var(--sip-blue) !important; }
+.station-sheet button.bg-slate-100 { background: #eaf1f0 !important; color: var(--sip-ink) !important; }
+.station-sheet button { min-height: 40px; }
+.station-card {
+  border-color: var(--sip-border) !important;
+  background: #fff !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+}
+.station-card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(20,45,53,.08) !important; }
+.station-card.ring-2 { border-color: var(--sip-blue) !important; box-shadow: 0 0 0 2px rgba(8,126,145,.14) !important; }
+.station-card .bg-purple-50 { background: #ecf4f5 !important; }
+.station-card .text-purple-700 { color: #1e6574 !important; }
+.app-bottom-nav {
+  background: rgba(255,255,255,.98) !important;
+  border-color: var(--sip-border) !important;
+  box-shadow: 0 -5px 24px rgba(20,45,53,.07) !important;
+}
+.app-bottom-nav button { min-height: 48px; }
+.app-bottom-nav button:has(.bg-cyan-500) { color: var(--sip-blue) !important; }
+.app-bottom-nav .bg-cyan-500 { background: var(--sip-blue) !important; }
+.station-pin .pin-bubble,
+.station-pin.selected .pin-bubble { background: var(--sip-blue) !important; box-shadow: 0 4px 14px rgba(8,126,145,.28) !important; }
+.station-pin .pin-tip, .station-pin.selected .pin-tip { border-top-color: var(--sip-blue) !important; }
+
+@media (min-width: 900px) {
+  .station-sheet {
+    left: 24px !important;
+    right: auto !important;
+    width: min(440px, calc(100vw - 48px));
+    bottom: 24px !important;
+    border: 1px solid var(--sip-border) !important;
+    border-radius: 24px !important;
+  }
+  .app-bottom-nav {
+    left: auto !important;
+    right: 24px !important;
+    bottom: 24px !important;
+    width: 340px;
+    border: 1px solid var(--sip-border) !important;
+    border-radius: 18px !important;
+    overflow: hidden;
+  }
+}
+@media (max-width: 480px) {
+  .scan-gate-main { padding-inline: 24px !important; padding-top: 36px !important; gap: 22px; }
+  .scan-gate-intro h1 { font-size: clamp(36px, 10vw, 44px) !important; }
+  .scan-gate-intro p { font-size: 15px !important; margin-top: 14px !important; }
+  .scan-gate-stage .aspect-square { width: min(100%, 278px) !important; }
+  .app-header { padding-inline: 12px !important; }
+  .station-sheet { border-radius: 20px 20px 0 0 !important; }
+}
+@media (max-width: 360px) {
+  .app-header button:first-child { display: none; }
+  .app-header .max-w-\[120px\] { max-width: 108px; }
+  .scan-gate-header { padding-inline: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+

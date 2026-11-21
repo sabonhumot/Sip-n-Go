@@ -50,7 +50,8 @@ export function estimateWalkingTime(meters: number): string {
 }
 
 /**
- * Authentic Cebu Refill Stations
+ * Cebu demo refill stations. Coordinates for the CIT-U cluster below are
+ * illustrative points around the real campus, not verified water outlets.
  */
 const CEBU_STATIONS_DATA: Array<{
   name: string;
@@ -260,6 +261,45 @@ const CEBU_STATIONS_DATA: Array<{
     tags: ['Student Favorite', 'Double Spout'],
   }
 ];
+
+// Mock refill points around the CIT-U campus on N. Bacalso Avenue.
+// Images are stock stand-ins and do not depict these exact locations.
+const CITU_MOCK_LOCATIONS: Array<{
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  waterTypes: WaterType[];
+  image: string;
+}> = [
+  { name: 'CIT-U Main Gate Refill', address: 'CIT-U area, N. Bacalso Avenue, Cebu City', lat: 10.29543, lng: 123.88012, waterTypes: ['Filtered', 'Chilled'], image: 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=600&q=80' },
+  { name: 'CIT-U Library Walk Refill', address: 'CIT-U campus area, Cebu City', lat: 10.29593, lng: 123.88057, waterTypes: ['Filtered', 'Ambient'], image: 'https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=600&q=80' },
+  { name: 'CIT-U South Walk Refill', address: 'South of CIT-U, Cebu City', lat: 10.29476, lng: 123.88062, waterTypes: ['Filtered', 'Chilled'], image: 'https://images.unsplash.com/photo-1523362628745-0c100150b504?auto=format&fit=crop&w=600&q=80' },
+  { name: 'N. Bacalso North Refill', address: 'N. Bacalso Avenue, near CIT-U, Cebu City', lat: 10.29710, lng: 123.88022, waterTypes: ['Filtered', 'Ambient'], image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=600&q=80' },
+  { name: 'Tres de Abril Walk Refill', address: 'Tres de Abril area, near CIT-U, Cebu City', lat: 10.29473, lng: 123.88168, waterTypes: ['Filtered', 'Chilled'], image: 'https://images.unsplash.com/photo-1568667256549-094345857637?auto=format&fit=crop&w=600&q=80' },
+  { name: 'Labangon Side Refill', address: 'Labangon area, near CIT-U, Cebu City', lat: 10.29664, lng: 123.87886, waterTypes: ['Filtered', 'Ambient'], image: 'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=600&q=80' },
+  { name: 'Tisa Connector Refill', address: 'Tisa area, near CIT-U, Cebu City', lat: 10.29376, lng: 123.87905, waterTypes: ['Filtered', 'Chilled'], image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80' },
+  { name: 'Duljo Walk Refill', address: 'Duljo area, near CIT-U, Cebu City', lat: 10.29385, lng: 123.88211, waterTypes: ['Filtered', 'Ambient'], image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=600&q=80' },
+];
+
+const CITU_MOCK_STATIONS: typeof CEBU_STATIONS_DATA = CITU_MOCK_LOCATIONS.map((point) => ({
+  ...point,
+  description: 'Filtered water refill point near Cebu Institute of Technology University.',
+  isFree: true,
+  priceTag: 'Free',
+  rating: 0,
+  reviewCount: 0,
+  openingHours: 'Hours unavailable',
+  isOpen: true,
+  indoorOutdoor: 'Outdoor',
+  accessibility: false,
+  hasBottleRinse: false,
+  status: 'Operational',
+  lastCleaned: 'Not reported',
+  metrics: { tds: 0, ph: 0, tempC: 0 },
+  verified: false,
+  tags: ['CIT-U', 'Campus area'],
+}));
 
 /**
  * Realistic seed templates to generate localized stations around any global coordinates
@@ -475,7 +515,7 @@ export function isNearCebu(lat: number, lng: number): boolean {
 
 /**
  * Generates nearby stations for the given coordinates.
- * If in/near Cebu, returns authentic Cebu City refill points with calculated distances!
+ * If in/near Cebu, returns Cebu demo points with calculated distances.
  */
 export function generateStationsNear(
   centerLat: number,
@@ -483,7 +523,7 @@ export function generateStationsNear(
 ): RefillStation[] {
   // If user is located in or exploring Cebu
   if (isNearCebu(centerLat, centerLng)) {
-    return CEBU_STATIONS_DATA.map((item, idx) => ({
+    return [...CEBU_STATIONS_DATA, ...CITU_MOCK_STATIONS].map((item, idx) => ({
       ...item,
       id: `cebu-station-${idx + 1}`,
       distanceMeters: calculateDistance(centerLat, centerLng, item.lat, item.lng),
@@ -529,6 +569,7 @@ export function generateStationsNear(
  */
 export const PRESET_CITIES = [
   { name: 'My Current GPS', lat: 0, lng: 0, isCurrentGps: true },
+  { name: 'Cebu City (CIT-U)', lat: 10.29578, lng: 123.88047, isCurrentGps: false },
   { name: 'Cebu City (I.T. Park)', lat: 10.3297, lng: 123.9059, isCurrentGps: false },
   { name: 'Cebu City (Ayala / CBP)', lat: 10.3173, lng: 123.9056, isCurrentGps: false },
   { name: 'Cebu City (Fuente Osmeña)', lat: 10.3117, lng: 123.8924, isCurrentGps: false },
