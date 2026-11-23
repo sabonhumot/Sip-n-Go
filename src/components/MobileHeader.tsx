@@ -1,7 +1,8 @@
 import type { FC } from 'react';
-import { Droplet, MapPin, QrCode } from './Icons';
+import { MapPin, QrCode } from './Icons';
 import type { BottleData, UserLocation } from '../types';
 import { PRESET_CITIES } from '../utils/geo';
+import sipLogo from '../assets/SIP_N_GO_LOGO.png';
 
 interface MobileHeaderProps {
   bottle: BottleData;
@@ -25,8 +26,12 @@ export const MobileHeader: FC<MobileHeaderProps> = ({
       <div className="flex items-center justify-between gap-2">
         {/* Brand Logo & Name */}
         <div className="flex items-center gap-2 shrink-0">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-sm shadow-cyan-500/30">
-            <Droplet size={18} className="fill-white" />
+          <div className="w-9 h-9 rounded-xl overflow-hidden bg-white dark:bg-slate-800 shadow-sm border border-cyan-100 dark:border-slate-700/80 flex items-center justify-center p-0.5">
+            <img
+              src={sipLogo}
+              alt="Sip n Go Logo"
+              className="w-full h-full object-contain"
+            />
           </div>
           <div>
             <div className="text-sm font-black tracking-tight text-slate-900 dark:text-white leading-none">

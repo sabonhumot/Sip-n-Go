@@ -1,6 +1,6 @@
 import type { FC } from 'react';
+import sipLogo from '../assets/SIP_N_GO_LOGO.png';
 import {
-  Droplet,
   QrCode,
   MapPin,
 } from './Icons';
@@ -28,9 +28,9 @@ export const Navbar: FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between gap-4">
         {/* Brand Logo */}
         <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-cyan-500/25">
-            <Droplet size={22} className="fill-white" />
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white dark:border-slate-900"></span>
+          <div className="relative w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-center shadow-md shadow-cyan-500/10 overflow-hidden p-1">
+            <img src={sipLogo} alt="Sip n Go Logo" className="w-full h-full object-contain" />
+            <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white dark:border-slate-900"></span>
           </div>
 
           <div>

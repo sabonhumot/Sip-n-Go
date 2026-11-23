@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import type { FC } from 'react';
-import { X, QrCode, Check, Droplet, Sparkles, RefreshCw, Download } from './Icons';
+import { X, QrCode, Check, RefreshCw, Download } from './Icons';
 import type { BottleData } from '../types';
+import sipLogo from '../assets/SIP_N_GO_LOGO.png';
 
 interface BottleQRModalProps {
   isOpen: boolean;
@@ -136,7 +137,9 @@ export const BottleQRModal: FC<BottleQRModalProps> = ({
           </button>
 
           <div className="flex items-center gap-2 mb-2 text-cyan-200 text-xs font-bold tracking-widest uppercase">
-            <Sparkles size={14} />
+            <div className="w-5 h-5 rounded-md overflow-hidden bg-white/20 p-0.5 flex items-center justify-center">
+              <img src={sipLogo} alt="Sip n Go" className="w-full h-full object-contain" />
+            </div>
             <span>Sip n Go Smart Bottle Tag</span>
           </div>
 
@@ -159,8 +162,8 @@ export const BottleQRModal: FC<BottleQRModalProps> = ({
             />
             {/* Watermark badge at center */}
             <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-              <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-900 shadow-md border-2 border-cyan-500 flex items-center justify-center">
-                <Droplet size={20} className="text-cyan-500 fill-cyan-500" />
+              <div className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 shadow-md border-2 border-cyan-500 flex items-center justify-center p-1 overflow-hidden">
+                <img src={sipLogo} alt="Sip n Go" className="w-full h-full object-contain" />
               </div>
             </div>
           </div>

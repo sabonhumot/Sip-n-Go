@@ -2,8 +2,6 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import type { FC } from 'react';
 import {
   Camera,
-  QrCode,
-  Droplet,
   Sparkles,
   SwitchCamera,
   Check,
@@ -11,6 +9,7 @@ import {
   Upload,
   Lock,
 } from './Icons';
+import sipLogo from '../assets/SIP_N_GO_LOGO.png';
 
 interface BottleScanGateProps {
   onUnlockBottle: (bottleId: string) => void;
@@ -309,8 +308,12 @@ export const BottleScanGate: FC<BottleScanGateProps> = ({
       {/* Top Header Bar */}
       <header className="scan-gate-header relative z-10 pt-safe px-5 pb-3 flex items-center justify-between border-b border-slate-200/80 bg-white/80 backdrop-blur-md shadow-xs">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-md shadow-cyan-500/20 text-white">
-            <Droplet size={18} className="fill-white" />
+          <div className="w-9 h-9 rounded-xl overflow-hidden bg-white shadow-sm border border-cyan-100 flex items-center justify-center p-0.5">
+            <img
+              src={sipLogo}
+              alt="Sip n Go Logo"
+              className="w-full h-full object-contain"
+            />
           </div>
           <div>
             <div className="text-base font-black tracking-tight leading-none text-slate-900">
@@ -416,8 +419,8 @@ export const BottleScanGate: FC<BottleScanGateProps> = ({
               {/* Bottle Graphic representation */}
               <div className="relative mx-auto w-24 h-24 mb-4 flex items-center justify-center">
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-cyan-100 to-blue-100 blur-xl"></div>
-                <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-tr from-cyan-50 via-sky-50 to-blue-50 border border-cyan-200 flex flex-col items-center justify-center p-2 shadow-inner">
-                  <QrCode size={36} className="text-cyan-600 mb-1" />
+                <div className="relative w-20 h-20 rounded-2xl bg-white border border-cyan-200 flex flex-col items-center justify-center p-2 shadow-sm">
+                  <img src={sipLogo} alt="Sip n Go" className="w-12 h-12 object-contain mb-0.5" />
                   <span className="text-[9px] font-mono font-bold text-cyan-800">SIP-TAG</span>
                 </div>
               </div>

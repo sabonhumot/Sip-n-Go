@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import type { FC } from 'react';
 import { X, Droplet, Leaf, Plus, Sparkles, QrCode } from './Icons';
 import type { BottleData } from '../types';
+import sipLogo from '../assets/SIP_N_GO_LOGO.png';
 
 interface BottleCompanionModalProps {
   isOpen: boolean;
@@ -100,8 +101,9 @@ export const BottleCompanionModal: FC<BottleCompanionModalProps> = ({
           </button>
 
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white text-xs font-semibold uppercase tracking-wider backdrop-blur-sm">
-              Sip n Go Reusable Bottle
+            <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white text-xs font-semibold uppercase tracking-wider backdrop-blur-sm flex items-center gap-1.5">
+              <img src={sipLogo} alt="Sip n Go" className="w-3.5 h-3.5 object-contain" />
+              <span>Sip n Go Reusable Bottle</span>
             </span>
             <span className="flex items-center gap-1 text-xs text-cyan-100">
               <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
@@ -125,6 +127,10 @@ export const BottleCompanionModal: FC<BottleCompanionModalProps> = ({
             <div className="relative w-24 h-44 rounded-3xl border-4 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 overflow-hidden shadow-md flex flex-col justify-end p-1">
               {/* Cap */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-3 bg-slate-700 dark:bg-slate-500 rounded-t-md"></div>
+              {/* Physical Bottle Brand Logo Stamp */}
+              <div className="absolute top-5 left-1/2 -translate-x-1/2 w-8 h-8 opacity-80 pointer-events-none z-10 flex items-center justify-center">
+                <img src={sipLogo} alt="Sip n Go" className="w-full h-full object-contain drop-shadow-xs" />
+              </div>
               {/* Water Liquid Wave */}
               <div
                 className="w-full bg-gradient-to-t from-cyan-500 to-blue-400 rounded-2xl transition-all duration-700 ease-out relative"
